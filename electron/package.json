@@ -1,0 +1,24 @@
+{
+  "name": "electron",
+  "version": "1.0.0",
+  "private": true,
+  "main": "main.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "NODE_ENV=development electron .",
+    "build": "electron-builder --config electron-builder.json",
+    "build:win": "electron-builder --win --config electron-builder.json",
+    "build:mac": "electron-builder --mac --config electron-builder.json",
+    "build:linux": "electron-builder --linux --config electron-builder.json",
+    "pack": "electron-builder --dir"
+  },
+  "dependencies": {
+    "electron": "^28.1.0"
+  },
+  "devDependencies": {
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "extends": "./electron-builder.json"
+  }
+}
