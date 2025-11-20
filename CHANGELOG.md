@@ -13,7 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Zero-knowledge end-to-end encryption with XChaCha20-Poly1305
 - Argon2id password hashing with unique salts
 - Cross-platform desktop application (Windows, macOS, Linux)
-- Browser extension for Chrome, Edge, and Firefox (Manifest v3)
 - Secure vault entry management with per-entry encryption keys
 
 #### Family Sharing
@@ -83,11 +82,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Backend**: Node.js + Express
 - **Database**: PostgreSQL 14+
 - **Crypto**: libsodium, Argon2
-- **Extension**: Manifest v3 with native messaging
 
 ### Known Limitations
 - No protection against compromised desktop application
-- Extension trusts desktop app via native messaging
 - Weak master passwords reduce security
 - Memory dumps could expose keys while vault unlocked
 - No mobile application (planned for future)
@@ -112,7 +109,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced audit log filtering and search
 - Family ownership transfer
 - Share credentials with multiple families
-- Browser extension for Safari
 - Password history tracking
 - Secure notes and file storage
 - Emergency access feature

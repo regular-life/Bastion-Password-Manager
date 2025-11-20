@@ -1,6 +1,6 @@
 # Bastion Password Manager
 
-A secure, zero-knowledge, end-to-end encrypted password manager with desktop application, browser extension, and family sharing capabilities.
+A secure, zero-knowledge, end-to-end encrypted password manager with desktop application and family sharing capabilities.
 
 ## Overview
 
@@ -11,7 +11,6 @@ Bastion is a privacy-focused password manager that ensures your master key never
 - **🔒 Zero-Knowledge Encryption**: Your master key never touches our servers
 - **👨‍👩‍👧‍👦 Family Sharing**: Securely share credentials without exposing passwords
 - **🔑 Smart Password Generator**: Auto-detects site requirements and generates compliant passwords
-- **🌐 Browser Extension**: Seamless autofill for Chrome, Edge, and Firefox
 - **💻 Cross-Platform Desktop App**: Windows, macOS, and Linux support
 - **🔄 Account Recovery**: Secure recovery through trusted contacts
 - **📊 Audit Logging**: Track all credential access and sharing activity
@@ -25,7 +24,6 @@ Bastion is a privacy-focused password manager that ensures your master key never
 - **Backend**: Node.js + Express
 - **Database**: PostgreSQL
 - **Cryptography**: libsodium (XChaCha20-Poly1305) + Argon2id
-- **Extension**: Manifest v3
 
 ### Security Model
 
@@ -57,7 +55,6 @@ Bastion is a privacy-focused password manager that ensures your master key never
 - **Node.js** 18 or higher
 - **PostgreSQL** 14 or higher
 - **Git** (for cloning)
-- Chrome/Edge browser (for extension)
 
 ### Installation
 
@@ -99,17 +96,6 @@ npm run dev:frontend
 npm run dev:electron
 ```
 
-#### 4. Build Browser Extension
-
-```bash
-npm run build:extension
-```
-
-Then load in browser:
-1. Open `chrome://extensions/`
-2. Enable "Developer mode"
-3. Click "Load unpacked"
-4. Select the `extension` directory
 
 ## Production Deployment
 
@@ -209,11 +195,6 @@ Bastion-Password-Manager/
 │   ├── preload.js            # Preload script
 │   └── electron-builder.json # Build configuration
 │
-├── extension/            # Browser extension
-│   ├── manifest.json         # Extension configuration
-│   ├── background.js         # Service worker
-│   ├── content.js            # Content script
-│   └── popup.html            # Extension popup
 │
 ├── shared/               # Shared utilities
 │   ├── crypto.js             # Crypto functions
@@ -233,7 +214,6 @@ npm run setup              # First-time setup (installs deps, creates DB)
 npm run dev:backend        # Start backend server (port 3001)
 npm run dev:frontend       # Start frontend dev server (port 5173)
 npm run dev:electron       # Launch Electron desktop app
-npm run build:extension    # Build browser extension
 ```
 
 ### Production
@@ -304,7 +284,6 @@ echo "VITE_API_URL=https://api.yourdomain.com" > .env.local
 ### Known Limitations
 
 ⚠️ No protection against compromised desktop app  
-⚠️ Extension trusts desktop app via native messaging  
 ⚠️ No protection if master password is weak  
 ⚠️ Memory dumps could expose keys while vault is unlocked  
 
@@ -327,7 +306,7 @@ npm test --workspace=backend
 
 1. **Create Account**: Sign up → Enter credentials → Verify vault created
 2. **Add Credential**: Add entry → Check database shows only ciphertext
-3. **Autofill**: Navigate to site → Extension autofills → Verify correct credentials
+3. **Autofill**: Navigate to site → Copy/Paste credentials → Verify correct credentials
 4. **Family Sharing**: Create family → Share credential → Member autofills without viewing password
 5. **Account Recovery**: Setup trusted contact → Initiate recovery → Approve → Complete with new password
 
@@ -349,11 +328,6 @@ createdb bastion
 psql bastion
 ```
 
-### Extension Can't Connect to Desktop App
-
-1. Ensure desktop app is running and logged in
-2. Check extension ID matches in `electron/main.js`
-3. Reload extension in `chrome://extensions/`
 
 ### Port Already in Use
 
@@ -383,7 +357,7 @@ npm run build:electron
 
 ## Documentation
 
-- **User Guide**: See [User-Guide.md](User-Guide.md) for detailed end-user instructions
+- **User Guide**: See [User-Guide.md](User-Guide.md) for detailed end-user instructions (also available as [USER-GUIDE.tex](USER-GUIDE.tex) for LaTeX compilation)
 - **API Documentation**: See backend route files for API endpoints
 - **Security Details**: See `Architecture > Security Model` above
 
@@ -400,7 +374,7 @@ npm run build:electron
 For issues or questions:
 - **GitHub Issues**: Report bugs or request features
 - **Documentation**: Check this README and User-Guide.md
-- **Email**: support@bastion-pm.example.com (update with actual email)
+- **Email**: Open a GitHub Issue
 
 ## License
 

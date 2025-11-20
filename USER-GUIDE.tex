@@ -1,0 +1,542 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+
+% Configuration
+\geometry{margin=1in}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Bastion Password Manager - User Guide},
+}
+
+% Header and Footer
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Bastion Password Manager}
+\lhead{User Guide}
+\rfoot{Page \thepage}
+
+% Title Page
+\title{\textbf{Bastion Password Manager} \\ User Guide}
+\author{Bastion Development Team}
+\date{Version 1.0 | November 2025}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+\tableofcontents
+\newpage
+
+\section{Introduction}
+Welcome to Bastion! This guide will help you get started with your secure password manager.
+
+\section{Installation}
+
+\subsection{Desktop Application}
+
+\subsubsection{Windows}
+\begin{enumerate}
+    \item Download \texttt{Bastion Setup.exe}.
+    \item Double-click the installer.
+    \item Follow the installation wizard.
+    \item Launch Bastion from the Start menu or desktop shortcut.
+\end{enumerate}
+
+\subsubsection{macOS}
+\begin{enumerate}
+    \item Download \texttt{Bastion.dmg}.
+    \item Open the DMG file.
+    \item Drag Bastion to your Applications folder.
+    \item Open Bastion from Applications.
+\end{enumerate}
+
+\subsubsection{Linux}
+\begin{enumerate}
+    \item Download \texttt{Bastion.AppImage}.
+    \item Make it executable: \texttt{chmod +x Bastion.AppImage}.
+    \item Run it: \texttt{./Bastion.AppImage}.
+\end{enumerate}
+
+
+\section{Getting Started}
+
+\subsection{Creating Your Account}
+\begin{enumerate}
+    \item \textbf{Launch Bastion} desktop application.
+    \item Click \textbf{"Sign Up"}.
+    \item Enter your \textbf{email address}.
+    \item Create a \textbf{strong master password}:
+    \begin{itemize}
+        \item Use at least 12 characters.
+        \item Mix uppercase, lowercase, numbers, and symbols.
+        \item Make it memorable but unique.
+        \item \textbf{IMPORTANT}: This password cannot be recovered if forgotten!
+    \end{itemize}
+    \item Click \textbf{"Create Account"}.
+\end{enumerate}
+You're now ready to start using Bastion!
+
+\subsection{Your First Login}
+\begin{enumerate}
+    \item \textbf{Launch Bastion}.
+    \item Enter your \textbf{email} and \textbf{master password}.
+    \item Click \textbf{"Log In"}.
+    \item Your vault will unlock.
+\end{enumerate}
+\textbf{Tip}: The desktop app will keep you logged in for 24 hours by default.
+
+\section{Managing Your Vault}
+
+\subsection{Adding a Password}
+\begin{enumerate}
+    \item In the Bastion app, go to the \textbf{"Vault"} section.
+    \item Click \textbf{"Add Entry"}.
+    \item Fill in the details:
+    \begin{itemize}
+        \item \textbf{Website URL}: \texttt{https://example.com}
+        \item \textbf{Username}: Your username or email
+        \item \textbf{Password}: Your password (or generate a new one)
+        \item \textbf{Notes} (optional): Additional information
+    \end{itemize}
+    \item Click \textbf{"Save"}.
+\end{enumerate}
+Your password is now encrypted and stored securely!
+
+\subsection{Editing a Password}
+\begin{enumerate}
+    \item Find the entry in your vault.
+    \item Click on it to view details.
+    \item Click \textbf{"Edit"}.
+    \item Make your changes.
+    \item Click \textbf{"Save"}.
+\end{enumerate}
+
+\subsection{Deleting a Password}
+\begin{enumerate}
+    \item Find the entry in your vault.
+    \item Click on it to view details.
+    \item Click \textbf{"Delete"}.
+    \item Confirm deletion.
+\end{enumerate}
+\textbf{Warning}: Deleted passwords cannot be recovered.
+
+\subsection{Searching Your Vault}
+Use the search bar at the top to quickly find entries by:
+\begin{itemize}
+    \item Website name
+    \item URL
+    \item Username
+\end{itemize}
+
+
+\section{Password Generator}
+Bastion includes a smart password generator that creates strong, site-compliant passwords.
+
+\subsection{Using the Generator}
+
+\subsubsection{Method 1: In the Desktop App}
+\begin{enumerate}
+    \item When adding or editing an entry, click \textbf{"Generate Password"}.
+    \item Review the generated password.
+    \item Adjust settings if needed:
+    \begin{itemize}
+        \item Length (12-64 characters)
+        \item Include uppercase letters
+        \item Include lowercase letters
+        \item Include numbers
+        \item Include symbols
+    \end{itemize}
+    \item Click \textbf{"Use This Password"}.
+\end{enumerate}
+
+
+\subsection{Password Strength Indicator}
+\begin{itemize}
+    \item \textbf{Weak} (Red): Too short or simple
+    \item \textbf{Fair} (Orange): Decent but could be better
+    \item \textbf{Good} (Yellow): Strong enough
+    \item \textbf{Excellent} (Green): Very strong
+\end{itemize}
+Always aim for "Good" or "Excellent" strength.
+
+\section{Family Sharing}
+Share passwords with family members securely—they can use the passwords without seeing them!
+
+\subsection{Understanding Family Sharing}
+\begin{itemize}
+    \item \textbf{Owner}: You create the family and share credentials.
+    \item \textbf{Members}: Family members can autofill shared passwords but \textbf{cannot view them}.
+    \item \textbf{Security}: Shared passwords are never visible to members—only autofilled.
+\end{itemize}
+
+\subsection{Creating a Family}
+\begin{enumerate}
+    \item In Bastion, go to \textbf{"Families"} section.
+    \item Click \textbf{"Create Family"}.
+    \item Enter a family name (e.g., "Smith Family").
+    \item Click \textbf{"Create"}.
+\end{enumerate}
+You are now the owner of this family!
+
+\subsection{Inviting Family Members}
+\begin{enumerate}
+    \item Open your family.
+    \item Click \textbf{"Create Invite Link"}.
+    \item Set expiration (default: 7 days).
+    \item \textbf{Copy the link} and send it to your family member via email, messaging app, etc.
+    \item They click the link and accept the invite.
+\end{enumerate}
+\textbf{Note}: Invite links expire and can only be used once.
+
+\subsection{Sharing a Password}
+\begin{enumerate}
+    \item Go to your \textbf{"Vault"}.
+    \item Select the credential you want to share.
+    \item Click \textbf{"Share with Family"}.
+    \item Choose which family to share with.
+    \item \textbf{(Optional)} Set allowed domains:
+    \begin{itemize}
+        \item Leave empty to allow all domains.
+        \item Or specify: \texttt{netflix.com}, \texttt{facebook.com}.
+    \end{itemize}
+    \item Click \textbf{"Share"}.
+\end{enumerate}
+The password is now shared! Family members can autofill it.
+
+\subsection{Using Shared Passwords (As a Member)}
+\begin{enumerate}
+    \item Log in to the desktop app.
+    \item Navigate to the login page (e.g., netflix.com).
+    \item Copy the username and password from Bastion.
+    \item Paste into the login form.
+\end{enumerate}
+
+\textbf{What You'll See:}
+\begin{itemize}
+    \item Website name and URL
+    \item Username (visible)
+    \item Password: \texttt{••••••••••} (masked)
+\end{itemize}
+
+\textbf{What You Can Do:}
+\begin{itemize}
+    \item Autofill the password
+\end{itemize}
+
+\textbf{What You Cannot Do:}
+\begin{itemize}
+    \item View the actual password
+    \item Copy the password
+    \item Edit the password
+    \item Share it with others
+\end{itemize}
+
+\subsection{Viewing Who Used Your Shared Passwords}
+\begin{enumerate}
+    \item Go to \textbf{"Families"} $\rightarrow$ Select your family.
+    \item Click \textbf{"Audit Log"}.
+    \item View recent activity:
+    \begin{itemize}
+        \item Who requested autofill
+        \item Which password
+        \item Which website
+        \item When (timestamp)
+        \item Success or failure
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Stopping Sharing}
+\begin{enumerate}
+    \item Go to \textbf{"Families"} $\rightarrow$ Select your family.
+    \item Click \textbf{"Shared Credentials"}.
+    \item Find the credential.
+    \item Click \textbf{"Unshare"} or \textbf{"Revoke"}.
+    \item Confirm.
+\end{enumerate}
+Members will immediately lose access to this password.
+
+\subsection{Removing a Family Member}
+\begin{enumerate}
+    \item Go to \textbf{"Families"} $\rightarrow$ Select your family.
+    \item Click \textbf{"Members"}.
+    \item Select the member to remove.
+    \item Click \textbf{"Remove from Family"}.
+    \item Confirm.
+\end{enumerate}
+They will lose access to all shared credentials immediately.
+
+\section{Account Recovery}
+If you forget your master password, you can recover your account through trusted contacts.
+
+\subsection{Setting Up Account Recovery}
+
+\subsubsection{Step 1: Add Trusted Contacts}
+\begin{enumerate}
+    \item Go to \textbf{"Account Recovery"} section.
+    \item Click \textbf{"Add Trusted Contact"}.
+    \item Choose a contact from:
+    \begin{itemize}
+        \item Your family members (if in a family)
+        \item Other Bastion users (by email)
+    \end{itemize}
+    \item Click \textbf{"Add"}.
+\end{enumerate}
+\textbf{Recommendation}: Add 2-3 trusted contacts for redundancy.
+
+\subsubsection{Step 2: They Accept}
+\begin{enumerate}
+    \item Your contact receives a notification or request.
+    \item They review and accept being your trusted contact.
+    \item System encrypts your master key for them.
+\end{enumerate}
+\textbf{Note}: Trusted contacts can help you recover but \textbf{cannot access your vault} unless you request recovery.
+
+\subsection{Recovering Your Account}
+If you forget your master password:
+
+\subsubsection{Step 1: Initiate Recovery}
+\begin{enumerate}
+    \item On the login screen, click \textbf{"Forgot Password?"}.
+    \item Enter your \textbf{email address}.
+    \item Select a \textbf{trusted contact} from the list.
+    \item Click \textbf{"Request Recovery"}.
+\end{enumerate}
+
+\subsubsection{Step 2: Wait for Approval}
+\begin{enumerate}
+    \item Your trusted contact will receive a notification.
+    \item They log into Bastion.
+    \item They go to \textbf{"Account Recovery"} section.
+    \item They see your request and click \textbf{"Approve"}.
+    \item They enter their master password to confirm.
+\end{enumerate}
+
+\subsubsection{Step 3: Complete Recovery}
+\begin{enumerate}
+    \item Check the status in your recovery request.
+    \item Once approved, click \textbf{"Complete Recovery"}.
+    \item Enter a \textbf{new master password}.
+    \item Click \textbf{"Reset Password"}.
+\end{enumerate}
+Your vault is now accessible with your new password!
+
+\textbf{Important Notes:}
+\begin{itemize}
+    \item The trusted contact \textbf{cannot access your vault}.
+    \item They only approve the recovery.
+    \item You must set a \textbf{new} master password.
+    \item Your vault data remains encrypted throughout.
+\end{itemize}
+
+\section{Security Best Practices}
+
+\subsection{Master Password}
+\textbf{DO:}
+\begin{itemize}
+    \item Use a unique password (not used elsewhere).
+    \item Make it at least 12 characters.
+    \item Use a passphrase: "correct-horse-battery-staple".
+    \item Write it down and store it securely (physical safe).
+\end{itemize}
+
+\textbf{DON'T:}
+\begin{itemize}
+    \item Use common passwords.
+    \item Reuse passwords from other accounts.
+    \item Share your master password with anyone.
+    \item Store it digitally (in emails, notes, etc.).
+\end{itemize}
+
+\subsection{Vault Passwords}
+\textbf{DO:}
+\begin{itemize}
+    \item Use the password generator for new passwords.
+    \item Use unique passwords for each site.
+    \item Use the maximum allowed length.
+    \item Enable all character types (uppercase, lowercase, numbers, symbols).
+    \item Update old/weak passwords regularly.
+\end{itemize}
+
+\textbf{DON'T:}
+\begin{itemize}
+    \item Reuse passwords across sites.
+    \item Use personal information (birthdays, names).
+    \item Use simple patterns (123456, qwerty).
+\end{itemize}
+
+\subsection{Family Sharing}
+\textbf{DO:}
+\begin{itemize}
+    \item Only share with people you completely trust.
+    \item Review audit logs regularly.
+    \item Use domain restrictions when possible.
+    \item Revoke access when someone leaves.
+    \item Set up multiple trusted contacts for recovery.
+\end{itemize}
+
+\textbf{DON'T:}
+\begin{itemize}
+    \item Share your master password.
+    \item Share credentials you don't want accessed.
+    \item Ignore unusual activity in audit logs.
+    \item Trust screenshots of "shared" passwords.
+\end{itemize}
+
+\subsection{General Security}
+\textbf{DO:}
+\begin{itemize}
+    \item Lock Bastion when stepping away.
+    \item Log out on shared computers.
+    \item Keep the desktop app updated.
+    \item Set up account recovery before you need it.
+\end{itemize}
+
+\textbf{DON'T:}
+\begin{itemize}
+    \item Leave Bastion unlocked and unattended.
+    \item Use Bastion on untrusted/public computers.
+    \item Ignore security warnings or prompts.
+    \item Share invite links publicly.
+\end{itemize}
+
+\section{Troubleshooting}
+
+\subsection{I Forgot My Master Password}
+See Account Recovery section. If you didn't set up trusted contacts, \textbf{your account cannot be recovered}. This is by design for security.
+
+
+\subsection{"Cannot Connect to Server" Error}
+\textbf{Possible Causes:}
+\begin{itemize}
+    \item Backend server is down.
+    \item Network connection issue.
+    \item Firewall blocking connection.
+\end{itemize}
+
+\textbf{Solution:}
+\begin{enumerate}
+    \item Check your internet connection.
+    \item Contact your system administrator.
+    \item Wait a few minutes and try again.
+\end{enumerate}
+
+\subsection{Shared Password Not Showing Up}
+\textbf{For Members:}
+\begin{enumerate}
+    \item Make sure you accepted the family invite.
+    \item Refresh your vault (log out and log back in).
+    \item Check with the owner that they shared it.
+\end{enumerate}
+
+\textbf{For Owners:}
+\begin{enumerate}
+    \item Verify you clicked "Share".
+    \item Check the family has the right members.
+    \item Check audit logs for any errors.
+\end{enumerate}
+
+\subsection{Desktop App Won't Start}
+\textbf{Windows:}
+\begin{enumerate}
+    \item Try running as Administrator.
+    \item Check Windows Defender didn't block it.
+    \item Reinstall the application.
+\end{enumerate}
+
+\textbf{macOS:}
+\begin{enumerate}
+    \item Go to System Preferences $\rightarrow$ Security \& Privacy.
+    \item Allow Bastion to run.
+    \item If still failing, reinstall.
+\end{enumerate}
+
+\textbf{Linux:}
+\begin{enumerate}
+    \item Make sure the AppImage is executable: \texttt{chmod +x Bastion.AppImage}.
+    \item Install FUSE if needed: \texttt{sudo apt install fuse}.
+    \item Try extracting and running directly.
+\end{enumerate}
+
+\section{FAQs}
+
+\subsection{General Questions}
+\textbf{Q: Is my data safe?} \\
+A: Yes! Your master key never leaves your device. All data is encrypted before being sent to the server. Even if the server is compromised, your passwords remain secure.
+
+\textbf{Q: Can Bastion employees see my passwords?} \\
+A: No. We use zero-knowledge encryption. Your passwords are encrypted on your device, and we never have access to your master key.
+
+\textbf{Q: What happens if I lose my master password?} \\
+A: If you set up trusted contacts, you can recover your account. Otherwise, there is no way to recover your account—this is by design for security.
+
+\textbf{Q: Can I use Bastion offline?} \\
+A: The desktop app requires internet connection to sync. However, once synced, you can view (but not edit) your vault offline.
+
+\textbf{Q: How much does Bastion cost?} \\
+A: Contact your administrator for pricing/licensing information.
+
+\subsection{Family Sharing}
+\textbf{Q: Can family members see my passwords?} \\
+A: No! Family members can only autofill shared passwords. They cannot view, copy, or export them.
+
+\textbf{Q: Can family members share credentials they received?} \\
+A: No. Only the owner can share credentials.
+
+\textbf{Q: How many family members can I have?} \\
+A: There is no hard limit, but we recommend keeping families small and trustworthy.
+
+\textbf{Q: Can a shared password be used on any website?} \\
+A: Only if you allow it. You can restrict shared passwords to specific domains when sharing.
+
+\textbf{Q: Will I know if a family member uses a shared password?} \\
+A: Yes! Every autofill request is logged in the audit log with timestamp and website.
+
+\subsection{Technical Questions}
+\textbf{Q: What encryption does Bastion use?} \\
+A: We use XChaCha20-Poly1305 for encryption and Argon2id for password hashing.
+
+\textbf{Q: Where is my data stored?} \\
+A: Encrypted data is stored on the backend server. Your master key and decrypted passwords only exist on your device.
+
+\textbf{Q: Can I export my passwords?} \\
+A: This feature is coming soon. Contact your administrator for manual export if needed.
+
+\textbf{Q: Does Bastion work on mobile?} \\
+A: Not yet. Mobile apps are planned for a future release.
+
+\textbf{Q: Can I import passwords from another password manager?} \\
+A: This feature is coming soon.
+
+
+\section{Getting Help}
+If you need additional assistance:
+\begin{itemize}
+    \item \textbf{Documentation}: Reread this guide and the README.
+    \item \textbf{System Administrator}: Contact your IT department or Bastion administrator.
+    \item \textbf{Email Support}: support@bastion-pm.example.com (update with actual contact).
+    \item \textbf{Report Bugs}: Contact your administrator with details.
+\end{itemize}
+
+\section{Tips for Success}
+\begin{enumerate}
+    \item \textbf{Set up trusted contacts immediately} after creating your account.
+    \item \textbf{Use the password generator} for all new accounts.
+    \item \textbf{Review shared credentials} weekly if you're a family owner.
+    \item \textbf{Update passwords regularly}, especially after security breaches.
+    \item \textbf{Lock your vault} when stepping away from your computer.
+    \item \textbf{Never share your master password} with anyone, including family.
+\end{enumerate}
+
+\end{document}

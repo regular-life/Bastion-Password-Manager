@@ -225,9 +225,9 @@ npm run build:app
 ```
 
 The script will:
-- Build frontend with configured backend URL
-- Build Electron installer(s)
-- Output to `electron/dist/`
+-   Build frontend with configured backend URL
+-   Build Electron installer(s)
+-   Output to `electron/dist/`
 
 #### Manual Build
 
@@ -274,21 +274,21 @@ electron/dist/
 
 #### To End Users
 
-1. **Upload installers** to a file server or cloud storage
-2. **Create download page** with instructions:
-   - Windows: Download and run `Bastion Setup.exe`
-   - macOS: Download, open DMG, drag to Applications
-   - Linux: Download AppImage, make executable, run
+1.  **Upload installers** to a file server or cloud storage
+2.  **Create download page** with instructions:
+    -   Windows: Download and run `Bastion Setup.exe`
+    -   macOS: Download, open DMG, drag to Applications
+    -   Linux: Download AppImage, make executable, run
 
-3. **Provide user guide**: Share the User-Guide.md
+3.  **Provide user guide**: Share the User-Guide.md
 
 #### Internal Distribution
 
 For corporate/internal use:
-- Use internal file server
-- Deploy via group policy (Windows)
-- Use MDM for macOS
-- Package in internal app store
+-   Use internal file server
+-   Deploy via group policy (Windows)
+-   Use MDM for macOS
+-   Package in internal app store
 
 ### Testing Before Distribution
 
@@ -346,10 +346,10 @@ pm2 restart bastion-backend
 
 ### Desktop App Updates
 
-1. Build new version with updated version number
-2. Distribute new installer to users
-3. Users install over existing version
-4. (Future: Implement auto-update via electron-updater)
+1.  Build new version with updated version number
+2.  Distribute new installer to users
+3.  Users install over existing version
+4.  (Future: Implement auto-update via electron-updater)
 
 ## Monitoring
 
@@ -422,15 +422,15 @@ psql bastion < bastion-backup-20251121.sql
 
 ## Security Checklist
 
-- [ ] Backend runs as non-root user
-- [ ] Firewall configured (only port 3001 or 443 open)
-- [ ] PostgreSQL has strong passwords
-- [ ] SSL/TLS enabled for production (reverse proxy)
-- [ ] Regular database backups configured
-- [ ] Server OS patched and updated
-- [ ] SSH uses key authentication (disable password auth)
-- [ ] Monitoring/logging enabled
-- [ ] User installers are from trusted source only
+-   [ ] Backend runs as non-root user
+-   [ ] Firewall configured (only port 3001 or 443 open)
+-   [ ] PostgreSQL has strong passwords
+-   [ ] SSL/TLS enabled for production (reverse proxy)
+-   [ ] Regular database backups configured
+-   [ ] Server OS patched and updated
+-   [ ] SSH uses key authentication (disable password auth)
+-   [ ] Monitoring/logging enabled
+-   [ ] User installers are from trusted source only
 
 ## Troubleshooting
 
@@ -452,11 +452,11 @@ cat .env
 
 ### Desktop app can't connect to backend
 
-1. Check backend is running: `pm2 status`
-2. Check firewall allows port 3001
-3. Test from client: `curl http://SERVER_IP:3001/api/health`
-4. Verify `VITE_API_URL` was set correctly during build
-5. Check network connectivity
+1.  Check backend is running: `pm2 status`
+2.  Check firewall allows port 3001
+3.  Test from client: `curl http://SERVER_IP:3001/api/health`
+4.  Verify `VITE_API_URL` was set correctly during build
+5.  Check network connectivity
 
 ### Database issues
 

@@ -25,6 +25,7 @@ The following redundant documentation files were removed and their content conso
   - Project structure and available commands
   - Configuration examples
   - Troubleshooting section
+  - **New**: Added reference to LaTeX User Guide
 
 #### setup.sh
 - **Purpose**: Automated development environment setup
@@ -50,7 +51,6 @@ The following redundant documentation files were removed and their content conso
   - Installation instructions for all platforms
   - Creating and managing accounts
   - Vault management (add, edit, delete, search)
-  - Browser extension usage and autofill
   - Password generator guide
   - Family sharing detailed walkthrough
   - Account recovery procedures
@@ -59,7 +59,12 @@ The following redundant documentation files were removed and their content conso
   - Comprehensive FAQ section
 - **Length**: ~1,000 lines covering every user-facing feature
 
-#### 2. DEPLOYMENT.md
+#### 2. USER-GUIDE.tex
+- **Purpose**: LaTeX version of the User Guide for professional printing/PDF generation
+- **Audience**: Users preferring a printable format
+- **Contents**: Same content as User-Guide.md, formatted in LaTeX
+
+#### 3. DEPLOYMENT.md
 - **Purpose**: Production deployment guide
 - **Audience**: System administrators and DevOps engineers
 - **Contents**:
@@ -77,7 +82,7 @@ The following redundant documentation files were removed and their content conso
   - Complete deployment checklist
 - **Length**: ~600 lines with detailed step-by-step instructions
 
-#### 3. CHANGELOG.md
+#### 4. CHANGELOG.md
 - **Purpose**: Version history and release notes
 - **Audience**: All stakeholders
 - **Contents**:
@@ -89,7 +94,7 @@ The following redundant documentation files were removed and their content conso
   - Upgrade notes
 - **Follows**: [Keep a Changelog](https://keepachangelog.com/) format
 
-#### 4. scripts/deploy-backend.sh
+#### 5. scripts/deploy-backend.sh
 - **Purpose**: Automated backend deployment script
 - **Features**:
   - Interactive SSH configuration (defaults to user4@192.168.2.246)
@@ -101,7 +106,7 @@ The following redundant documentation files were removed and their content conso
   - Displays next steps
 - **Usage**: `npm run deploy:backend`
 
-#### 5. scripts/build-app.sh
+#### 6. scripts/build-app.sh
 - **Purpose**: Automated desktop app builder
 - **Features**:
   - Interactive backend URL configuration
@@ -112,7 +117,7 @@ The following redundant documentation files were removed and their content conso
   - Provides testing and distribution instructions
 - **Usage**: `npm run build:app`
 
-#### 6. docs/INDEX.md
+#### 7. docs/INDEX.md
 - **Purpose**: Documentation overview and navigation
 - **Contents**:
   - Description of all documentation files
@@ -127,7 +132,8 @@ The following redundant documentation files were removed and their content conso
 ```
 Bastion-Password-Manager/
 ├── README.md                 # Technical documentation (developers/admins)
-├── User-Guide.md             # End-user manual (all users)
+├── User-Guide.md             # End-user manual (Markdown)
+├── USER-GUIDE.tex            # End-user manual (LaTeX)
 ├── DEPLOYMENT.md             # Production deployment guide (admins)
 ├── CHANGELOG.md              # Version history (all)
 ├── LICENSE.txt               # MIT license
@@ -147,7 +153,7 @@ Bastion-Password-Manager/
 ## Documentation by Audience
 
 ### For End Users
-→ **User-Guide.md** (17KB, ~1,000 lines)
+→ **User-Guide.md** (17KB, ~1,000 lines) & **USER-GUIDE.tex**
   - Complete usage instructions
   - Step-by-step guides with examples
   - Troubleshooting and FAQ

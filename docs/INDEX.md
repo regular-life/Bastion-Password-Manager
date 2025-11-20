@@ -11,7 +11,6 @@ Topics covered:
 - Installing the desktop application (Windows, macOS, Linux)
 - Creating and managing your account
 - Adding, editing, and organizing passwords
-- Using the browser extension for autofill
 - Generating strong passwords
 - Family sharing features
 - Account recovery through trusted contacts
@@ -116,7 +115,6 @@ Topics covered:
 | Backend | `npm run dev:backend` | Start backend development server |
 | Frontend | `npm run dev:frontend` | Start frontend development server |
 | Desktop | `npm run dev:electron` | Launch desktop app in development mode |
-| Extension | `npm run build:extension` | Build browser extension |
 | Tests | `npm test` | Run all tests |
 
 ### Production Scripts
@@ -145,7 +143,8 @@ scripts/
 ```
 Bastion-Password-Manager/
 ├── README.md              # Main technical documentation
-├── User-Guide.md          # End-user manual
+├── User-Guide.md          # End-user manual (Markdown)
+├── USER-GUIDE.tex         # End-user manual (LaTeX)
 ├── DEPLOYMENT.md          # Production deployment guide
 ├── CHANGELOG.md           # Version history
 ├── LICENSE.txt            # MIT license
@@ -158,7 +157,6 @@ Bastion-Password-Manager/
 ├── backend/               # Backend server code
 ├── frontend/              # React UI code
 ├── electron/              # Desktop app wrapper
-├── extension/             # Browser extension
 ├── shared/                # Shared crypto utilities
 └── scripts/               # Automation scripts
 ```
