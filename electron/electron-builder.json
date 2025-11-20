@@ -1,7 +1,7 @@
 {
   "appId": "com.bastion.app",
   "productName": "Bastion",
-  "copyright": "Copyright © 2024",
+  "copyright": "Copyright © 2025",
   "directories": {
     "output": "dist",
     "buildResources": "build"
@@ -9,7 +9,13 @@
   "files": [
     "main.js",
     "preload.js",
-    "../frontend/dist/**/*"
+    {
+      "from": "../frontend/dist",
+      "to": "frontend",
+      "filter": [
+        "**/*"
+      ]
+    }
   ],
   "win": {
     "target": [
@@ -70,10 +76,10 @@
   },
   "linux": {
     "target": [
-      "AppImage",
-      "deb"
+      "AppImage"
     ],
     "category": "Utility",
-    "icon": "build/icons/"
+    "icon": "build/icons/",
+    "maintainer": "Bastion Team <team@bastion.dev>"
   }
 }

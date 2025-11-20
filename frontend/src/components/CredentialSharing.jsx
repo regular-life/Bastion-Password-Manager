@@ -9,7 +9,9 @@ import {
 import { generateKey, encrypt, decrypt, bytesToString } from '../crypto';
 
 function CredentialSharing({ token, masterKey }) {
-  const [family, setFamily] = useState(null);
+  const [families, setFamilies] = useState([]);
+  const [selectedFamilyId, setSelectedFamilyId] = useState('');
+  const [selectedFamily, setSelectedFamily] = useState(null);
   const [familyKey, setFamilyKey] = useState(null);
   const [myCredentials, setMyCredentials] = useState([]);
   const [sharedCredentials, setSharedCredentials] = useState([]);
@@ -28,12 +30,43 @@ function CredentialSharing({ token, masterKey }) {
     try {
       setLoading(true);
 
-      // Load family info
+      // Load families
       const familyData = await getMyFamily(token);
-      setFamily(familyData.family);
+      const loadedFamilies = familyData.families || [];
+      setFamilies(loadedFamilies);
+
+      // If we have families but no selection, select the first one
+      if (loadedFamilies.length > 0 && !selectedFamilyId) {
+        setSelectedFamilyId(loadedFamilies[0].id);
+      }
+
+      setError('');
+    } catch (err) {
+      if (err.status === 404) {
+        setFamilies([]);
+      } else {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load family-specific data when selection changes
+  useEffect(() => {
+    if (selectedFamilyId && families.length > 0) {
+      loadFamilyData(selectedFamilyId);
+    }
+  }, [selectedFamilyId, families]);
+
+  const loadFamilyData = async (familyId) => {
+    try {
+      setLoading(true);
+      const currentFamily = families.find(f => f.id === familyId);
+      setSelectedFamily(currentFamily);
 
       // Load and decrypt family key
-      const keyData = await getFamilyKey(token, familyData.family.id);
+      const keyData = await getFamilyKey(token, familyId);
       const decryptedFamilyKey = decrypt(
         keyData.encryptedFamilyKey,
         keyData.encryptedFamilyKeyNonce,
@@ -42,7 +75,7 @@ function CredentialSharing({ token, masterKey }) {
       setFamilyKey(decryptedFamilyKey);
 
       // If owner, load my credentials to share
-      if (familyData.family.role === 'owner') {
+      if (currentFamily.role === 'owner') {
         const vaultData = await getVaultEntries(token);
         const decrypted = vaultData.entries.map((entry) => {
           try {
@@ -88,12 +121,23 @@ function CredentialSharing({ token, masterKey }) {
         setMyCredentials(decrypted);
       }
 
+
+
       // Load shared credentials
-      const sharedData = await getSharedCredentials(token, familyData.family.id);
+      const sharedData = await getSharedCredentials(token, familyId);
+
+      console.log('Shared credentials data:', sharedData);
+      console.log('Family key available:', !!decryptedFamilyKey);
 
       // Decrypt shared credentials
       const decryptedShared = sharedData.credentials.map((cred) => {
         try {
+          console.log('Processing shared credential:', {
+            id: cred.id,
+            hasContentKey: !!cred.encrypted_content_key,
+            hasData: !!cred.encrypted_data
+          });
+
           // Decrypt the content key with FAMILY KEY (not master key)
           const contentKey = decrypt(
             cred.encrypted_content_key,
@@ -101,12 +145,25 @@ function CredentialSharing({ token, masterKey }) {
             decryptedFamilyKey
           );
 
+          if (!contentKey) {
+            console.error('Failed to decrypt content key for credential:', cred.id);
+            throw new Error('Content key decryption failed');
+          }
+
+          console.log('Content key decrypted successfully');
+
           // Decrypt credential data with content key
           const dataBytes = decrypt(
             cred.encrypted_data,
             cred.encrypted_data_nonce,
             contentKey
           );
+
+          if (!dataBytes) {
+            console.error('Failed to decrypt data for credential:', cred.id);
+            throw new Error('Data decryption failed');
+          }
+
           const data = JSON.parse(bytesToString(dataBytes));
 
           // Decrypt URL if present
@@ -125,23 +182,24 @@ function CredentialSharing({ token, masterKey }) {
             url: decryptedUrl,
             username: data.username,
             // Members can't see plaintext password
-            isMasked: familyData.family.role === 'member',
+            isMasked: currentFamily.role === 'member',
             owner_email: cred.owner_email,
           };
         } catch (err) {
-          console.error('Failed to decrypt shared credential:', err);
-          return null;
+          console.error('Failed to decrypt shared credential:', {
+            id: cred.id,
+            error: err.message,
+            stack: err.stack
+          });
+          // Instead of filtering out, let's throw the error to see it
+          throw new Error(`Failed to decrypt credential ${cred.id}: ${err.message}`);
         }
       }).filter(Boolean);
 
       setSharedCredentials(decryptedShared);
       setError('');
     } catch (err) {
-      if (err.status === 404) {
-        setFamily(null);
-      } else {
-        setError(err.message);
-      }
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -180,14 +238,14 @@ function CredentialSharing({ token, masterKey }) {
       await shareCredential(
         token,
         cred.id,
-        family.id,
+        selectedFamilyId,
         encryptedContentKey.ciphertext,
         encryptedContentKey.nonce
       );
 
       setSuccess('Credential shared successfully!');
       setSelectedCredential('');
-      await loadData();
+      await loadFamilyData(selectedFamilyId);
     } catch (err) {
       setError(err.message);
     }
@@ -197,7 +255,7 @@ function CredentialSharing({ token, masterKey }) {
     return <div className="loading">Loading...</div>;
   }
 
-  if (!family) {
+  if (families.length === 0) {
     return (
       <div className="info-box">
         <p>You need to create or join a family first to share credentials.</p>
@@ -205,14 +263,28 @@ function CredentialSharing({ token, masterKey }) {
     );
   }
 
+  if (!selectedFamily) return null;
+
   return (
     <div className="credential-sharing">
       <h2>Shared Credentials</h2>
 
+      <div className="form-group">
+        <label>Select Family</label>
+        <select
+          value={selectedFamilyId}
+          onChange={(e) => setSelectedFamilyId(e.target.value)}
+        >
+          {families.map(f => (
+            <option key={f.id} value={f.id}>{f.name} ({f.role})</option>
+          ))}
+        </select>
+      </div>
+
       {error && <div className="error">{error}</div>}
       {success && <div className="success">{success}</div>}
 
-      {family.role === 'owner' && (
+      {selectedFamily.role === 'owner' && (
         <div className="section">
           <h3>Share a Credential</h3>
           {myCredentials.length === 0 ? (
@@ -243,14 +315,14 @@ function CredentialSharing({ token, masterKey }) {
       )}
 
       <div className="section">
-        <h3>Shared with {family.name}</h3>
+        <h3>Shared with {selectedFamily.name}</h3>
         {sharedCredentials.length > 0 ? (
           <div className="credentials-list">
             {sharedCredentials.map((cred) => (
               <div key={cred.id} className="vault-entry">
                 <div className="vault-entry-header">
                   <div className="vault-entry-url">{cred.url || 'No URL'}</div>
-                  {family.role === 'member' && (
+                  {selectedFamily.role === 'member' && (
                     <div className="badge">Masked Autofill Only</div>
                   )}
                 </div>

@@ -14,6 +14,15 @@ async function clearDatabase() {
     await pool.query('DELETE FROM shared_credentials');
     console.log('✓ Cleared shared_credentials');
 
+    await pool.query('DELETE FROM recovery_requests');
+    console.log('✓ Cleared recovery_requests');
+
+    await pool.query('DELETE FROM recovery_contacts');
+    console.log('✓ Cleared recovery_contacts');
+
+    await pool.query('DELETE FROM user_recovery_keys');
+    console.log('✓ Cleared user_recovery_keys');
+
     await pool.query('DELETE FROM family_keys');
     console.log('✓ Cleared family_keys');
 

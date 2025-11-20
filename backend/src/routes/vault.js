@@ -47,7 +47,7 @@ router.post('/', async (req, res) => {
     } = req.body;
 
     if (!encrypted_entry_key || !encrypted_entry_key_nonce ||
-        !encrypted_data || !encrypted_data_nonce) {
+      !encrypted_data || !encrypted_data_nonce) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -97,7 +97,7 @@ router.put('/:id', async (req, res) => {
     } = req.body;
 
     if (!encrypted_entry_key || !encrypted_entry_key_nonce ||
-        !encrypted_data || !encrypted_data_nonce) {
+      !encrypted_data || !encrypted_data_nonce) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 

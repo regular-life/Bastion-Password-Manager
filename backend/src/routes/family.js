@@ -68,42 +68,34 @@ router.post('/create', async (req, res) => {
 
 /**
  * GET /api/family/my-family
- * Get family for current user (returns first family with members)
+ * Get all families for current user
  */
 router.get('/my-family', async (req, res) => {
   try {
-    // Get user's family
-    const familyResult = await pool.query(
+    // Get user's families
+    const familiesResult = await pool.query(
       `SELECT f.id, f.name, f.owner_id, fm.role, f.created_at
        FROM families f
        JOIN family_members fm ON f.id = fm.family_id
        WHERE fm.user_id = $1
-       ORDER BY f.created_at DESC
-       LIMIT 1`,
+       ORDER BY f.created_at DESC`,
       [req.userId]
     );
 
-    if (familyResult.rows.length === 0) {
-      return res.status(404).json({ error: 'No family found' });
+    const families = familiesResult.rows;
+
+    // For each family, get member count (optional, but good for UI)
+    for (const family of families) {
+      const countResult = await pool.query(
+        'SELECT COUNT(*) as count FROM family_members WHERE family_id = $1',
+        [family.id]
+      );
+      family.memberCount = parseInt(countResult.rows[0].count);
     }
 
-    const family = familyResult.rows[0];
-
-    // Get family members
-    const membersResult = await pool.query(
-      `SELECT u.id, u.email, fm.role, fm.joined_at
-       FROM family_members fm
-       JOIN users u ON fm.user_id = u.id
-       WHERE fm.family_id = $1
-       ORDER BY fm.joined_at ASC`,
-      [family.id]
-    );
-
-    family.members = membersResult.rows;
-
-    res.json({ family });
+    res.json({ families });
   } catch (error) {
-    console.error('Get family error:', error);
+    console.error('Get families error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -273,7 +265,7 @@ router.get('/:familyId/members', async (req, res) => {
 
     // Get members
     const result = await pool.query(
-      `SELECT fm.id, fm.role, fm.joined_at, u.email
+      `SELECT fm.id, fm.role, fm.joined_at, u.id as user_id, u.email
        FROM family_members fm
        JOIN users u ON fm.user_id = u.id
        WHERE fm.family_id = $1

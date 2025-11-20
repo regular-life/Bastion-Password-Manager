@@ -54,7 +54,7 @@ function App() {
   };
 
   return (
-    <div className="app">
+    <div className="app-container">
       {!user ? (
         <Auth onLogin={handleLogin} />
       ) : (

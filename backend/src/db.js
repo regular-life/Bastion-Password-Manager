@@ -173,7 +173,8 @@ export async function initDatabase() {
         approved_at TIMESTAMP,
         completed_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        expires_at TIMESTAMP NOT NULL
+        expires_at TIMESTAMP NOT NULL,
+        session_public_key TEXT
       );
 
       CREATE INDEX IF NOT EXISTS idx_user_recovery_keys_user_id ON user_recovery_keys(user_id);
@@ -190,6 +191,13 @@ export async function initDatabase() {
       await client.query('ALTER TABLE shared_credentials ALTER COLUMN encrypted_url_nonce DROP NOT NULL');
     } catch (err) {
       // Ignore errors
+    }
+
+    // Migration to add session_public_key to recovery_requests
+    try {
+      await client.query('ALTER TABLE recovery_requests ADD COLUMN IF NOT EXISTS session_public_key TEXT');
+    } catch (err) {
+      console.error('Migration error:', err);
     }
 
     console.log('Database initialized successfully');

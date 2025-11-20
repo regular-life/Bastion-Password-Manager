@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3001/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
 export class ApiError extends Error {
   constructor(message, status) {
@@ -92,6 +92,14 @@ export async function createFamily(token, familyName, encryptedFamilyKey, encryp
 
 export async function getMyFamily(token) {
   return request('/family/my-family', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export async function getFamilyMembers(token, familyId) {
+  return request(`/family/${familyId}/members`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -194,10 +202,10 @@ export async function initiateRecovery(email) {
   });
 }
 
-export async function requestRecoveryUnauthenticated(userId, recoveryContactId) {
+export async function requestRecoveryUnauthenticated(userId, recoveryContactId, sessionPublicKey) {
   return request('/recovery/request-unauthenticated', {
     method: 'POST',
-    body: JSON.stringify({ userId, recoveryContactId }),
+    body: JSON.stringify({ userId, recoveryContactId, sessionPublicKey }),
   });
 }
 
@@ -207,10 +215,16 @@ export async function checkRecoveryStatusUnauthenticated(requestId) {
   });
 }
 
-export async function completeRecovery(requestId, newPasswordHash, newSalt) {
+export async function completeRecovery(requestId, newPassword, newSalt, vaultKeys) {
   return request('/recovery/complete-recovery', {
     method: 'POST',
-    body: JSON.stringify({ requestId, newPasswordHash, newSalt }),
+    body: JSON.stringify({ requestId, newPassword, newSalt, vaultKeys }),
+  });
+}
+
+export async function getVaultKeysForRecovery(requestId) {
+  return request(`/recovery/vault-keys/${requestId}`, {
+    method: 'GET',
   });
 }
 
@@ -270,12 +284,17 @@ export async function getPendingRecoveryRequests(token) {
 }
 
 export async function approveRecoveryRequest(token, requestId, encryptedMasterKeyForRequester, encryptedMasterKeyNonce) {
+  const body = { requestId, encryptedMasterKeyForRequester };
+  if (encryptedMasterKeyNonce) {
+    body.encryptedMasterKeyNonce = encryptedMasterKeyNonce;
+  }
+
   return request('/recovery/approve', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ requestId, encryptedMasterKeyForRequester, encryptedMasterKeyNonce }),
+    body: JSON.stringify(body),
   });
 }
 

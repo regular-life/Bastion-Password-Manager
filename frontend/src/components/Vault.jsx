@@ -12,6 +12,7 @@ import {
   bytesToString,
   secureClear,
 } from '../crypto';
+import { calculatePasswordStrength } from '../utils/passwordStrength';
 import FamilyManagement from './FamilyManagement';
 import CredentialSharing from './CredentialSharing';
 import PasswordGenerator from './PasswordGenerator';
@@ -27,7 +28,9 @@ function Vault({ user, token, masterKey, onLogout }) {
   const [url, setUrl] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState(null);
   const [editingId, setEditingId] = useState(null);
+  const [visiblePasswords, setVisiblePasswords] = useState(new Set());
 
   useEffect(() => {
     console.log('Vault mounted with masterKey:', !!masterKey);
@@ -196,6 +199,19 @@ function Vault({ user, token, masterKey, onLogout }) {
     setUrl('');
     setUsername('');
     setPassword('');
+    setPasswordStrength(null);
+  };
+
+  const togglePasswordVisibility = (entryId) => {
+    setVisiblePasswords(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(entryId)) {
+        newSet.delete(entryId);
+      } else {
+        newSet.add(entryId);
+      }
+      return newSet;
+    });
   };
 
   const renderTabContent = () => {
@@ -232,9 +248,47 @@ function Vault({ user, token, masterKey, onLogout }) {
                     <input
                       type="password"
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        setPasswordStrength(calculatePasswordStrength(e.target.value));
+                      }}
                       required
                     />
+                    {passwordStrength && password && (
+                      <div className="password-strength-indicator" style={{ marginTop: '0.5rem' }}>
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: '0.25rem'
+                        }}>
+                          <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                            Strength:
+                          </span>
+                          <span style={{
+                            fontSize: '0.875rem',
+                            fontWeight: '600',
+                            color: passwordStrength.color
+                          }}>
+                            {passwordStrength.label} ({passwordStrength.score}/100)
+                          </span>
+                        </div>
+                        <div style={{
+                          width: '100%',
+                          height: '4px',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          borderRadius: '2px',
+                          overflow: 'hidden'
+                        }}>
+                          <div style={{
+                            width: `${passwordStrength.score}%`,
+                            height: '100%',
+                            background: passwordStrength.color,
+                            transition: 'width 0.3s ease, background 0.3s ease'
+                          }} />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -265,38 +319,123 @@ function Vault({ user, token, masterKey, onLogout }) {
               </div>
             ) : (
               <div>
-                <h3 style={{ marginBottom: '15px' }}>Your Credentials</h3>
-                {entries.map((entry) => (
-                  <div key={entry.id} className="vault-entry">
-                    <div className="vault-entry-header">
-                      <div className="vault-entry-url">
-                        {entry.url || 'No URL'}
+                <h2 style={{ marginBottom: '2rem' }}>Your Credentials</h2>
+                <div style={{ display: 'grid', gap: '1rem' }}>
+                  {entries.map((entry) => (
+                    <div key={entry.id} className="vault-entry">
+                      <div className="vault-entry-header">
+                        <div style={{ flex: 1 }}>
+                          <div className="vault-entry-url">
+                            {entry.url || 'No URL'}
+                          </div>
+                          <div style={{
+                            fontSize: '0.8125rem',
+                            color: 'var(--text-tertiary)',
+                            marginTop: '0.25rem'
+                          }}>
+                            Added {new Date(entry.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <div className="vault-entry-actions">
+                          <button
+                            className="edit"
+                            onClick={() => handleEdit(entry)}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            Edit
+                          </button>
+                          <button
+                            className="delete"
+                            onClick={() => handleDelete(entry.id)}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            Delete
+                          </button>
+                        </div>
                       </div>
-                      <div className="vault-entry-actions">
-                        <button
-                          className="edit"
-                          onClick={() => handleEdit(entry)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="delete"
-                          onClick={() => handleDelete(entry.id)}
-                        >
-                          Delete
-                        </button>
+                      <div className="vault-entry-info">
+                        <div className="credential-row">
+                          <div className="credential-label">Username</div>
+                          <div className="credential-value">{entry.username}</div>
+                        </div>
+                        <div className="credential-row">
+                          <div className="credential-label">Password</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                              <div className="credential-value" style={{ fontFamily: 'monospace' }}>
+                                {visiblePasswords.has(entry.id) ? entry.password : '•'.repeat(12)}
+                              </div>
+                              <button
+                                className="icon-button"
+                                onClick={() => togglePasswordVisibility(entry.id)}
+                                title={visiblePasswords.has(entry.id) ? 'Hide password' : 'Show password'}
+                              >
+                                {visiblePasswords.has(entry.id) ? (
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                  </svg>
+                                ) : (
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                  </svg>
+                                )}
+                              </button>
+                              <button
+                                className="icon-button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(entry.password);
+                                }}
+                                title="Copy password"
+                              >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                              </button>
+                            </div>
+                            {(() => {
+                              const strength = calculatePasswordStrength(entry.password);
+                              return (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                  <div style={{
+                                    flex: 1,
+                                    height: '3px',
+                                    background: 'rgba(255, 255, 255, 0.1)',
+                                    borderRadius: '2px',
+                                    overflow: 'hidden'
+                                  }}>
+                                    <div style={{
+                                      width: `${strength.score}%`,
+                                      height: '100%',
+                                      background: strength.color
+                                    }} />
+                                  </div>
+                                  <span style={{
+                                    fontSize: '0.75rem',
+                                    color: strength.color,
+                                    fontWeight: '600',
+                                    minWidth: '60px',
+                                    textAlign: 'right'
+                                  }}>
+                                    {strength.label}
+                                  </span>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div className="vault-entry-info">
-                      <p>
-                        <strong>Username:</strong> {entry.username}
-                      </p>
-                      <p>
-                        <strong>Password:</strong> {'•'.repeat(12)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
           </div>

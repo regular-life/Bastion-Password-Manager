@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { generatePassword } from '../api';
+import { calculatePasswordStrength } from '../utils/passwordStrength';
 
 function PasswordGenerator() {
   const [requirements, setRequirements] = useState({
@@ -18,6 +19,10 @@ function PasswordGenerator() {
   const [strength, setStrength] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Custom password strength checking
+  const [customPassword, setCustomPassword] = useState('');
+  const [customStrength, setCustomStrength] = useState(null);
 
   const handleGenerate = async () => {
     setError('');
@@ -122,6 +127,16 @@ function PasswordGenerator() {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(generatedPassword);
+  };
+
+  const copyCustomToClipboard = () => {
+    navigator.clipboard.writeText(customPassword);
+  };
+
+  const handleCustomPasswordChange = (e) => {
+    const pwd = e.target.value;
+    setCustomPassword(pwd);
+    setCustomStrength(calculatePasswordStrength(pwd));
   };
 
   const getStrengthColor = (score) => {
@@ -288,6 +303,61 @@ function PasswordGenerator() {
           )}
         </div>
       )}
+
+      {/* Custom Password Strength Checker */}
+      <div className="section">
+        <h3>Check Custom Password Strength</h3>
+        <p className="info">
+          Enter any password to analyze its strength and get suggestions for improvement.
+        </p>
+        <div className="form-group">
+          <label>Your Password</label>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <input
+              type="text"
+              value={customPassword}
+              onChange={handleCustomPasswordChange}
+              placeholder="Enter a password to check its strength..."
+              style={{ flex: 1, fontSize: '16px', fontFamily: 'monospace' }}
+            />
+            {customPassword && (
+              <button onClick={copyCustomToClipboard}>Copy</button>
+            )}
+          </div>
+        </div>
+
+        {customStrength && customPassword && (
+          <div className="strength-meter">
+            <div className="strength-label">
+              Strength: <strong style={{ color: customStrength.color }}>
+                {customStrength.label} ({customStrength.score}/100)
+              </strong>
+            </div>
+            <div className="strength-bar">
+              <div
+                className="strength-fill"
+                style={{
+                  width: `${customStrength.score}%`,
+                  background: customStrength.color,
+                  transition: 'width 0.3s ease, background 0.3s ease'
+                }}
+              ></div>
+            </div>
+            {customStrength.feedback && customStrength.feedback.length > 0 && (
+              <div className="strength-feedback">
+                <p><strong>Suggestions:</strong></p>
+                <ul style={{ marginTop: '0.5rem', paddingLeft: '1.5rem' }}>
+                  {customStrength.feedback.map((item, index) => (
+                    <li key={index} style={{ marginBottom: '0.25rem', color: 'var(--text-secondary)' }}>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

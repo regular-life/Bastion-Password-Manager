@@ -3,9 +3,22 @@ import {
   initiateRecovery,
   requestRecoveryUnauthenticated,
   checkRecoveryStatusUnauthenticated,
+
+  completeRecovery,
+  getVaultKeysForRecovery,
   login,
 } from '../api';
-import { decrypt, deriveMasterKey, bytesToString } from '../crypto';
+import {
+  decrypt,
+  deriveMasterKey,
+  bytesToString,
+  generateKeyPair,
+  toBase64,
+  fromBase64,
+  decryptWithPrivateKey,
+  generateSalt,
+  encrypt,
+} from '../crypto';
 
 function AccountRecovery({ onBack, onRecoveryComplete }) {
   const [step, setStep] = useState('email'); // email, select-contact, waiting, set-password, complete
@@ -19,6 +32,7 @@ function AccountRecovery({ onBack, onRecoveryComplete }) {
   const [trustedContacts, setTrustedContacts] = useState([]);
   const [selectedContactId, setSelectedContactId] = useState('');
   const [requestId, setRequestId] = useState('');
+  const [sessionKeyPair, setSessionKeyPair] = useState(null);
   const [recoveredMasterKey, setRecoveredMasterKey] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -35,6 +49,11 @@ function AccountRecovery({ onBack, onRecoveryComplete }) {
       if (response.contacts && response.contacts.length > 0) {
         setUserId(response.userId);
         setTrustedContacts(response.contacts);
+
+        // Generate session keypair for this recovery session
+        const keyPair = generateKeyPair();
+        setSessionKeyPair(keyPair);
+
         setStep('select-contact');
         setSuccess(response.message);
       } else {
@@ -54,7 +73,8 @@ function AccountRecovery({ onBack, onRecoveryComplete }) {
     setLoading(true);
 
     try {
-      const response = await requestRecoveryUnauthenticated(userId, selectedContactId);
+      const sessionPublicKeyBase64 = toBase64(sessionKeyPair.publicKey);
+      const response = await requestRecoveryUnauthenticated(userId, selectedContactId, sessionPublicKeyBase64);
 
       setRequestId(response.requestId);
       setStep('waiting');
@@ -75,9 +95,22 @@ function AccountRecovery({ onBack, onRecoveryComplete }) {
       const status = await checkRecoveryStatusUnauthenticated(requestId);
 
       if (status.status === 'approved') {
-        // Recovery approved! User can now set a new password
-        setSuccess('✓ Recovery approved! Please set a new master password.');
-        setStep('set-password');
+        // Recovery approved! 
+        // Decrypt the master key using our session private key
+        try {
+          const decryptedMasterKey = decryptWithPrivateKey(
+            status.encrypted_master_key_for_requester,
+            sessionKeyPair.publicKey,
+            sessionKeyPair.privateKey
+          );
+
+          setRecoveredMasterKey(decryptedMasterKey);
+          setSuccess('✓ Recovery approved! Master key recovered. Please set a new master password.');
+          setStep('set-password');
+        } catch (decryptError) {
+          console.error('Failed to decrypt master key:', decryptError);
+          setError('Failed to decrypt recovered master key. Please try again.');
+        }
       } else if (status.status === 'pending') {
         setError('Recovery request is still pending. Please wait for your trusted contact to approve.');
       } else if (status.status === 'expired') {
@@ -110,29 +143,53 @@ function AccountRecovery({ onBack, onRecoveryComplete }) {
     setLoading(true);
 
     try {
-      // The user will set a new password, which will generate a new salt
-      // The backend will handle password hashing
-      // For now, we'll just tell them to log in with their new password
-      // In a full implementation, we'd need to:
       // 1. Generate new salt
-      // 2. Hash the password with argon2 (backend only)
-      // 3. Update the user's password in the database
+      const newSalt = generateSalt();
+      const newSaltBase64 = toBase64(newSalt);
 
-      // Since we can't hash passwords in the frontend (no argon2),
-      // we'll use the signup endpoint's logic
-      // Actually, we need a special endpoint that doesn't require the old password
+      // 2. Derive new master key
+      const newMasterKey = await deriveMasterKey(newPassword, newSaltBase64);
 
-      setSuccess('✓ Password reset initiated. Redirecting to login...');
+      // 3. Get encrypted vault keys
+      const vaultResponse = await getVaultKeysForRecovery(requestId);
+      const vaultKeys = vaultResponse.vaultKeys;
+
+      // 4. Re-encrypt vault keys
+      const reEncryptedVaultKeys = [];
+
+      if (vaultKeys && vaultKeys.length > 0) {
+        for (const entry of vaultKeys) {
+          // Decrypt entry key with OLD master key
+          const entryKey = decrypt(
+            entry.encrypted_entry_key,
+            entry.encrypted_entry_key_nonce,
+            recoveredMasterKey
+          );
+
+          if (!entryKey) {
+            throw new Error('Failed to decrypt a vault entry. Recovery failed.');
+          }
+
+          // Encrypt entry key with NEW master key
+          const encrypted = encrypt(entryKey, newMasterKey);
+
+          reEncryptedVaultKeys.push({
+            id: entry.id,
+            encrypted_entry_key: encrypted.ciphertext,
+            encrypted_entry_key_nonce: encrypted.nonce,
+          });
+        }
+      }
+
+      // 5. Complete recovery
+      await completeRecovery(requestId, newPassword, newSaltBase64, reEncryptedVaultKeys);
+
+      setSuccess('✓ Password reset successful! Redirecting to login...');
       setStep('complete');
 
-      // Note: This is a simplified version. In production, you'd want to:
-      // - Send the new password to a backend endpoint
-      // - Backend hashes it with argon2
-      // - Backend updates the user's password_hash and salt
-      // - User can then log in with the new password
-
     } catch (err) {
-      setError(err.message);
+      console.error('Recovery completion error:', err);
+      setError(err.message || 'Failed to complete recovery');
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { getMyFamily, getAuditLog } from '../api';
 
 function AuditLog({ token }) {
-  const [family, setFamily] = useState(null);
+  const [families, setFamilies] = useState([]);
+  const [selectedFamilyId, setSelectedFamilyId] = useState('');
+  const [selectedFamily, setSelectedFamily] = useState(null);
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -15,27 +17,49 @@ function AuditLog({ token }) {
     try {
       setLoading(true);
 
-      // Load family info
+      // Load families
       const familyData = await getMyFamily(token);
-      setFamily(familyData.family);
+      const allFamilies = familyData.families || [];
 
-      // Only owners can view audit logs
-      if (familyData.family.role !== 'owner') {
-        setError('Only family owners can view audit logs');
-        setLoading(false);
-        return;
+      // Filter for families where user is owner
+      const ownerFamilies = allFamilies.filter(f => f.role === 'owner');
+      setFamilies(ownerFamilies);
+
+      // Select first family if available
+      if (ownerFamilies.length > 0 && !selectedFamilyId) {
+        setSelectedFamilyId(ownerFamilies[0].id);
       }
 
-      // Load audit logs
-      const auditData = await getAuditLog(token, familyData.family.id);
-      setLogs(auditData.logs || []);
       setError('');
     } catch (err) {
       if (err.status === 404) {
-        setFamily(null);
+        setFamilies([]);
       } else {
         setError(err.message);
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedFamilyId && families.length > 0) {
+      loadFamilyLogs(selectedFamilyId);
+    }
+  }, [selectedFamilyId, families]);
+
+  const loadFamilyLogs = async (familyId) => {
+    try {
+      setLoading(true);
+      const currentFamily = families.find(f => f.id === familyId);
+      setSelectedFamily(currentFamily);
+
+      // Load audit logs
+      const auditData = await getAuditLog(token, familyId);
+      setLogs(auditData.logs || []);
+      setError('');
+    } catch (err) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -70,26 +94,34 @@ function AuditLog({ token }) {
     return <div className="loading">Loading audit log...</div>;
   }
 
-  if (!family) {
+  if (families.length === 0) {
     return (
       <div className="info-box">
-        <p>You need to create or join a family first to view audit logs.</p>
+        <p>You need to be a family owner to view audit logs.</p>
       </div>
     );
   }
 
-  if (family.role !== 'owner') {
-    return (
-      <div className="info-box">
-        <p>Only family owners can view audit logs.</p>
-      </div>
-    );
-  }
+  if (!selectedFamily) return null;
 
   return (
+
     <div className="audit-log">
       <h2>Audit Log</h2>
-      <p className="info">Security events for {family.name}</p>
+
+      <div className="form-group">
+        <label>Select Family</label>
+        <select
+          value={selectedFamilyId}
+          onChange={(e) => setSelectedFamilyId(e.target.value)}
+        >
+          {families.map(f => (
+            <option key={f.id} value={f.id}>{f.name}</option>
+          ))}
+        </select>
+      </div>
+
+      <p className="info">Security events for {selectedFamily.name}</p>
 
       {error && <div className="error">{error}</div>}
 

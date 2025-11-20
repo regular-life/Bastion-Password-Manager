@@ -40,6 +40,13 @@ export function generateKey() {
 }
 
 /**
+ * Generate a random salt
+ */
+export function generateSalt() {
+  return sodium.randombytes_buf(16);
+}
+
+/**
  * Encrypt data using XChaCha20-Poly1305
  */
 export function encrypt(plaintext, key) {

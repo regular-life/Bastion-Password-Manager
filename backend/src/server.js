@@ -54,8 +54,8 @@ async function start() {
       cleanupExpiredSessions().catch(console.error);
     }, 60 * 60 * 1000); // Every hour
 
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on http://0.0.0.0:${PORT}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

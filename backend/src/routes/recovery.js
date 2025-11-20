@@ -1,6 +1,15 @@
 import express from 'express';
 import { pool } from '../db.js';
 import { requireAuth } from '../auth.js';
+import argon2 from 'argon2';
+
+const ARGON2_CONFIG = {
+    type: argon2.argon2id,
+    memoryCost: 65536,
+    timeCost: 3,
+    parallelism: 4,
+    hashLength: 32,
+};
 
 const router = express.Router();
 
@@ -67,9 +76,9 @@ router.post('/initiate', async (req, res) => {
  */
 router.post('/request-unauthenticated', async (req, res) => {
     try {
-        const { userId, recoveryContactId } = req.body;
+        const { userId, recoveryContactId, sessionPublicKey } = req.body;
 
-        if (!userId || !recoveryContactId) {
+        if (!userId || !recoveryContactId || !sessionPublicKey) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
@@ -90,10 +99,10 @@ router.post('/request-unauthenticated', async (req, res) => {
 
         // Create recovery request
         const result = await pool.query(
-            `INSERT INTO recovery_requests (requester_id, trusted_contact_id, recovery_contact_id, expires_at)
-       VALUES ($1, $2, $3, $4)
+            `INSERT INTO recovery_requests (requester_id, trusted_contact_id, recovery_contact_id, expires_at, session_public_key)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING id, created_at`,
-            [userId, contact.trusted_contact_id, recoveryContactId, expiresAt]
+            [userId, contact.trusted_contact_id, recoveryContactId, expiresAt, sessionPublicKey]
         );
 
         res.json({
@@ -154,14 +163,58 @@ router.get('/check-status-unauthenticated/:requestId', async (req, res) => {
 });
 
 /**
+ * GET /api/recovery/vault-keys/:requestId
+ * Get encrypted vault keys for re-encryption (UNAUTHENTICATED but requires approved request)
+ */
+router.get('/vault-keys/:requestId', async (req, res) => {
+    try {
+        const { requestId } = req.params;
+
+        const requestResult = await pool.query(
+            `SELECT rr.id, rr.requester_id, rr.status, rr.expires_at
+       FROM recovery_requests rr
+       WHERE rr.id = $1`,
+            [requestId]
+        );
+
+        if (requestResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Recovery request not found' });
+        }
+
+        const request = requestResult.rows[0];
+
+        if (request.status !== 'approved') {
+            return res.status(400).json({ error: 'Recovery request not approved' });
+        }
+
+        if (new Date() > new Date(request.expires_at)) {
+            return res.status(400).json({ error: 'Recovery request has expired' });
+        }
+
+        // Get vault entries (only keys needed)
+        const vaultResult = await pool.query(
+            `SELECT id, encrypted_entry_key, encrypted_entry_key_nonce
+       FROM vault_entries
+       WHERE user_id = $1`,
+            [request.requester_id]
+        );
+
+        res.json({ vaultKeys: vaultResult.rows });
+    } catch (error) {
+        console.error('Get vault keys error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+/**
  * POST /api/recovery/complete-recovery (UNAUTHENTICATED)
  * Complete recovery by setting a new password with the recovered master key
  */
 router.post('/complete-recovery', async (req, res) => {
     try {
-        const { requestId, newPasswordHash, newSalt } = req.body;
+        const { requestId, newPassword, newSalt, vaultKeys } = req.body;
 
-        if (!requestId || !newPasswordHash || !newSalt) {
+        if (!requestId || !newPassword || !newSalt) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
@@ -195,11 +248,29 @@ router.post('/complete-recovery', async (req, res) => {
                 return res.status(400).json({ error: 'Recovery request has expired' });
             }
 
+            // Hash the new password
+            const passwordHash = await argon2.hash(newPassword, {
+                ...ARGON2_CONFIG,
+                salt: Buffer.from(newSalt, 'base64'),
+            });
+
             // Update user's password hash and salt
             await client.query(
                 'UPDATE users SET password_hash = $1, salt = $2 WHERE id = $3',
-                [newPasswordHash, Buffer.from(newSalt, 'base64'), request.requester_id]
+                [passwordHash, Buffer.from(newSalt, 'base64'), request.requester_id]
             );
+
+            // Update vault keys if provided
+            if (vaultKeys && Array.isArray(vaultKeys)) {
+                for (const key of vaultKeys) {
+                    await client.query(
+                        `UPDATE vault_entries 
+             SET encrypted_entry_key = $1, encrypted_entry_key_nonce = $2, updated_at = CURRENT_TIMESTAMP
+             WHERE id = $3 AND user_id = $4`,
+                        [key.encrypted_entry_key, key.encrypted_entry_key_nonce, key.id, request.requester_id]
+                    );
+                }
+            }
 
             // Mark recovery request as completed
             await client.query(
@@ -451,7 +522,7 @@ router.get('/request-data/:requestId', async (req, res) => {
 
         // Verify request exists and user is the trusted contact
         const requestResult = await pool.query(
-            `SELECT rr.id, rr.requester_id, rr.recovery_contact_id, rr.status, rr.expires_at
+            `SELECT rr.id, rr.requester_id, rr.recovery_contact_id, rr.status, rr.expires_at, rr.session_public_key
        FROM recovery_requests rr
        WHERE rr.id = $1 AND rr.trusted_contact_id = $2`,
             [requestId, req.userId]
@@ -483,6 +554,7 @@ router.get('/request-data/:requestId', async (req, res) => {
 
         res.json({
             encryptedMasterKey: contactResult.rows[0].encrypted_master_key,
+            sessionPublicKey: request.session_public_key,
         });
     } catch (error) {
         console.error('Get request data error:', error);
@@ -498,7 +570,7 @@ router.post('/approve', async (req, res) => {
     try {
         const { requestId, encryptedMasterKeyForRequester, encryptedMasterKeyNonce } = req.body;
 
-        if (!requestId || !encryptedMasterKeyForRequester || !encryptedMasterKeyNonce) {
+        if (!requestId || !encryptedMasterKeyForRequester) {
             return res.status(400).json({ error: 'Missing required fields' });
         }
 
@@ -539,7 +611,7 @@ router.post('/approve', async (req, res) => {
              encrypted_master_key_nonce = $2,
              approved_at = CURRENT_TIMESTAMP
          WHERE id = $3`,
-                [encryptedMasterKeyForRequester, encryptedMasterKeyNonce, requestId]
+                [encryptedMasterKeyForRequester, encryptedMasterKeyNonce || null, requestId]
             );
 
             await client.query('COMMIT');

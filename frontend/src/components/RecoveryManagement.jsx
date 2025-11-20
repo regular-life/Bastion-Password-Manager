@@ -59,12 +59,40 @@ function RecoveryManagement({ token, masterKey, user }) {
             const requestsData = await getPendingRecoveryRequests(token);
             setPendingRequests(requestsData.requests || []);
 
-            // Get family members
+            // Get all family members from all families
             try {
                 const familyData = await getMyFamily(token);
-                setFamilyMembers(familyData.family.members || []);
+                const allFamilies = familyData.families || [];
+
+                // Collect all unique members from all families
+                const allMembersMap = new Map();
+
+                for (const family of allFamilies) {
+                    // Fetch members for each family
+                    const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3001/api'}/family/${family.id}/members`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const members = data.members || [];
+
+                        // Add members to map (using user_id as key to avoid duplicates)
+                        members.forEach(member => {
+                            if (!allMembersMap.has(member.user_id)) {
+                                allMembersMap.set(member.user_id, {
+                                    id: member.user_id,
+                                    email: member.email,
+                                    familyName: family.name,
+                                });
+                            }
+                        });
+                    }
+                }
+
+                setFamilyMembers(Array.from(allMembersMap.values()));
             } catch (err) {
-                // No family yet
+                // No families yet
                 setFamilyMembers([]);
             }
         } catch (err) {
@@ -174,18 +202,17 @@ function RecoveryManagement({ token, masterKey, user }) {
                 privateKey
             );
 
-            // Re-encrypt the requester's master key with their public key
-            // so they can decrypt it when they complete recovery
-            // For now, we'll use a simple encryption with a temporary approach
-            // In production, the requester would provide an ephemeral public key
-            const reEncrypted = encrypt(requesterMasterKey, masterKey);
+            // Re-encrypt the requester's master key with their session public key
+            // so they can decrypt it with their session private key
+            const requesterSessionPublicKey = fromBase64(requestData.sessionPublicKey);
+            const encryptedForRequester = encryptForPublicKey(requesterMasterKey, requesterSessionPublicKey);
 
             // Approve the request
             await approveRecoveryRequest(
                 token,
                 request.id,
-                reEncrypted.ciphertext,
-                reEncrypted.nonce
+                encryptedForRequester,
+                null // No nonce for asymmetric encryption
             );
 
             setSuccess('Recovery request approved!');
@@ -249,7 +276,9 @@ function RecoveryManagement({ token, masterKey, user }) {
                                         m.email !== user.email  // Exclude current user
                                     )
                                     .map(member => (
-                                        <option key={member.id} value={member.id}>{member.email}</option>
+                                        <option key={member.id} value={member.id}>
+                                            {member.email} ({member.familyName})
+                                        </option>
                                     ))}
                             </select>
                         </div>

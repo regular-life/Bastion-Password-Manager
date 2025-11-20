@@ -10,11 +10,19 @@
     "shared"
   ],
   "scripts": {
+    "setup": "node scripts/setup.js",
+    "clean": "node scripts/clean.js",
     "install:all": "npm install",
     "dev:backend": "npm run dev --workspace=backend",
     "dev:frontend": "npm run dev --workspace=frontend",
     "dev:electron": "npm run dev --workspace=electron",
     "build:extension": "npm run build --workspace=extension",
-    "test": "npm run test --workspace=shared && npm run test --workspace=backend"
+    "build:frontend": "npm run build --workspace=frontend",
+    "build:electron": "npm run build --workspace=frontend && npm run build --workspace=electron",
+    "start:backend": "npm run start --workspace=backend",
+    "test": "npm run test --workspace=shared && npm run test --workspace=backend",
+    "deploy:backend": "bash scripts/deploy-backend.sh",
+    "build:app": "bash scripts/build-electron.sh",
+    "clear:db": "cd backend && DATABASE_URL=\"postgresql://localhost/bastion\" node clear-db.js"
   }
 }
