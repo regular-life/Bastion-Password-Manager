@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { signup, login } from '../api';
 import { deriveMasterKey } from '../crypto';
+import AccountRecovery from './AccountRecovery';
 
 function Auth({ onLogin }) {
   const [isLogin, setIsLogin] = useState(true);
+  const [showRecovery, setShowRecovery] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -51,6 +53,18 @@ function Auth({ onLogin }) {
     }
   };
 
+  if (showRecovery) {
+    return (
+      <AccountRecovery
+        onBack={() => setShowRecovery(false)}
+        onRecoveryComplete={(user, token, masterKey) => {
+          setShowRecovery(false);
+          onLogin(user, token, masterKey);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="auth-container">
       <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
@@ -97,6 +111,25 @@ function Auth({ onLogin }) {
           {loading ? 'Loading...' : isLogin ? 'Login' : 'Sign Up'}
         </button>
       </form>
+
+      {isLogin && (
+        <div style={{ marginTop: '10px', textAlign: 'center' }}>
+          <button
+            type="button"
+            onClick={() => setShowRecovery(true)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#007bff',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+              fontSize: '14px',
+            }}
+          >
+            Forgot your password?
+          </button>
+        </div>
+      )}
 
       <div className="switch-auth">
         {isLogin ? "Don't have an account?" : 'Already have an account?'}

@@ -8,6 +8,7 @@ import vaultRouter from './routes/vault.js';
 import familyRouter from './routes/family.js';
 import sharingRouter from './routes/sharing.js';
 import passwordRouter from './routes/password.js';
+import recoveryRouter from './routes/recovery.js';
 
 dotenv.config();
 
@@ -30,6 +31,7 @@ app.use('/api/vault', vaultRouter);
 app.use('/api/family', familyRouter);
 app.use('/api/sharing', sharingRouter);
 app.use('/api/password', passwordRouter);
+app.use('/api/recovery', recoveryRouter);
 
 // Health check
 app.get('/health', (req, res) => {

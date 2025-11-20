@@ -145,3 +145,42 @@ export function toBase64(data) {
 export function fromBase64(base64) {
   return sodium.from_base64(base64);
 }
+
+/**
+ * Generate a public/private key pair for asymmetric encryption
+ * @returns {object} Object containing publicKey and privateKey (Uint8Array)
+ */
+export function generateKeyPair() {
+  const keyPair = sodium.crypto_box_keypair();
+  return {
+    publicKey: keyPair.publicKey,
+    privateKey: keyPair.privateKey,
+  };
+}
+
+/**
+ * Encrypt data with recipient's public key (sealed box)
+ * @param {Uint8Array|string} plaintext - Data to encrypt
+ * @param {Uint8Array} recipientPublicKey - Recipient's public key
+ * @returns {string} Base64 encoded ciphertext
+ */
+export function encryptForPublicKey(plaintext, recipientPublicKey) {
+  const plaintextBytes = typeof plaintext === 'string'
+    ? sodium.from_string(plaintext)
+    : plaintext;
+
+  const ciphertext = sodium.crypto_box_seal(plaintextBytes, recipientPublicKey);
+  return sodium.to_base64(ciphertext);
+}
+
+/**
+ * Decrypt data with private key (sealed box)
+ * @param {string} ciphertextBase64 - Base64 encoded ciphertext
+ * @param {Uint8Array} publicKey - Recipient's public key
+ * @param {Uint8Array} privateKey - Recipient's private key
+ * @returns {Uint8Array} Decrypted plaintext
+ */
+export function decryptWithPrivateKey(ciphertextBase64, publicKey, privateKey) {
+  const ciphertext = sodium.from_base64(ciphertextBase64);
+  return sodium.crypto_box_seal_open(ciphertext, publicKey, privateKey);
+}

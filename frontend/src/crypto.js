@@ -97,3 +97,48 @@ export function secureClear(data) {
     }
   }
 }
+
+/**
+ * Generate a public/private key pair for asymmetric encryption
+ */
+export function generateKeyPair() {
+  const keyPair = sodium.crypto_box_keypair();
+  return {
+    publicKey: keyPair.publicKey,
+    privateKey: keyPair.privateKey,
+  };
+}
+
+/**
+ * Encrypt data with recipient's public key (sealed box)
+ */
+export function encryptForPublicKey(plaintext, recipientPublicKey) {
+  const plaintextBytes = typeof plaintext === 'string'
+    ? sodium.from_string(plaintext)
+    : plaintext;
+
+  const ciphertext = sodium.crypto_box_seal(plaintextBytes, recipientPublicKey);
+  return sodium.to_base64(ciphertext);
+}
+
+/**
+ * Decrypt data with private key (sealed box)
+ */
+export function decryptWithPrivateKey(ciphertextBase64, publicKey, privateKey) {
+  const ciphertext = sodium.from_base64(ciphertextBase64);
+  return sodium.crypto_box_seal_open(ciphertext, publicKey, privateKey);
+}
+
+/**
+ * Convert to base64
+ */
+export function toBase64(data) {
+  return sodium.to_base64(data);
+}
+
+/**
+ * Convert from base64
+ */
+export function fromBase64(data) {
+  return sodium.from_base64(data);
+}

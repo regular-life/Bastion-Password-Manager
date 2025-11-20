@@ -185,3 +185,129 @@ export async function generatePassword(requirements) {
     body: JSON.stringify({ requirements }),
   });
 }
+
+// Recovery (Unauthenticated)
+export async function initiateRecovery(email) {
+  return request('/recovery/initiate', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function requestRecoveryUnauthenticated(userId, recoveryContactId) {
+  return request('/recovery/request-unauthenticated', {
+    method: 'POST',
+    body: JSON.stringify({ userId, recoveryContactId }),
+  });
+}
+
+export async function checkRecoveryStatusUnauthenticated(requestId) {
+  return request(`/recovery/check-status-unauthenticated/${requestId}`, {
+    method: 'GET',
+  });
+}
+
+export async function completeRecovery(requestId, newPasswordHash, newSalt) {
+  return request('/recovery/complete-recovery', {
+    method: 'POST',
+    body: JSON.stringify({ requestId, newPasswordHash, newSalt }),
+  });
+}
+
+// Recovery (Authenticated)
+export async function setupRecoveryKeypair(token, publicKey, encryptedPrivateKey, encryptedPrivateKeyNonce) {
+  return request('/recovery/setup-keypair', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ publicKey, encryptedPrivateKey, encryptedPrivateKeyNonce }),
+  });
+}
+
+export async function getRecoveryKeypair(token) {
+  return request('/recovery/keypair', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export async function addTrustedContact(token, trustedContactId, encryptedMasterKey) {
+  return request('/recovery/add-trusted-contact', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ trustedContactId, encryptedMasterKey }),
+  });
+}
+
+export async function getTrustedContacts(token) {
+  return request('/recovery/trusted-contacts', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export async function requestRecovery(token, trustedContactId) {
+  return request('/recovery/request', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ trustedContactId }),
+  });
+}
+
+export async function getPendingRecoveryRequests(token) {
+  return request('/recovery/pending-requests', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export async function approveRecoveryRequest(token, requestId, encryptedMasterKeyForRequester, encryptedMasterKeyNonce) {
+  return request('/recovery/approve', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ requestId, encryptedMasterKeyForRequester, encryptedMasterKeyNonce }),
+  });
+}
+
+export async function getRecoveryRequestStatus(token, requestId) {
+  return request(`/recovery/request-status/${requestId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export async function getRecoveryRequestData(token, requestId) {
+  return request(`/recovery/request-data/${requestId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export async function removeTrustedContact(token, contactId) {
+  return request(`/recovery/trusted-contact/${contactId}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}
+
+export async function getUserPublicKey(token, userId) {
+  return request(`/recovery/user-public-key/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}

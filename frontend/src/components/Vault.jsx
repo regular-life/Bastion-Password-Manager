@@ -16,6 +16,7 @@ import FamilyManagement from './FamilyManagement';
 import CredentialSharing from './CredentialSharing';
 import PasswordGenerator from './PasswordGenerator';
 import AuditLog from './AuditLog';
+import RecoveryManagement from './RecoveryManagement';
 
 function Vault({ user, token, masterKey, onLogout }) {
   const [currentTab, setCurrentTab] = useState('vault');
@@ -308,6 +309,8 @@ function Vault({ user, token, masterKey, onLogout }) {
         return <PasswordGenerator />;
       case 'audit':
         return <AuditLog token={token} />;
+      case 'recovery':
+        return <RecoveryManagement token={token} masterKey={masterKey} user={user} />;
       default:
         return null;
     }
@@ -353,6 +356,12 @@ function Vault({ user, token, masterKey, onLogout }) {
           onClick={() => setCurrentTab('audit')}
         >
           Audit Log
+        </button>
+        <button
+          className={currentTab === 'recovery' ? 'tab active' : 'tab'}
+          onClick={() => setCurrentTab('recovery')}
+        >
+          Account Recovery
         </button>
       </div>
 

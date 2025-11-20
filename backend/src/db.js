@@ -139,6 +139,49 @@ export async function initDatabase() {
       CREATE INDEX IF NOT EXISTS idx_fill_tokens_token ON fill_tokens(token);
       CREATE INDEX IF NOT EXISTS idx_audit_log_family_id ON audit_log(family_id);
       CREATE INDEX IF NOT EXISTS idx_audit_log_user_id ON audit_log(user_id);
+
+      -- Recovery tables for Trusted Contact Escrow
+      CREATE TABLE IF NOT EXISTS user_recovery_keys (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        public_key TEXT NOT NULL,
+        encrypted_private_key TEXT NOT NULL,
+        encrypted_private_key_nonce TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS recovery_contacts (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        trusted_contact_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        encrypted_master_key TEXT NOT NULL,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(owner_id, trusted_contact_id)
+      );
+
+      CREATE TABLE IF NOT EXISTS recovery_requests (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        requester_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        trusted_contact_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        recovery_contact_id UUID NOT NULL REFERENCES recovery_contacts(id) ON DELETE CASCADE,
+        status VARCHAR(50) NOT NULL DEFAULT 'pending',
+        encrypted_master_key_for_requester TEXT,
+        encrypted_master_key_nonce TEXT,
+        approved_at TIMESTAMP,
+        completed_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        expires_at TIMESTAMP NOT NULL
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_user_recovery_keys_user_id ON user_recovery_keys(user_id);
+      CREATE INDEX IF NOT EXISTS idx_recovery_contacts_owner ON recovery_contacts(owner_id);
+      CREATE INDEX IF NOT EXISTS idx_recovery_contacts_trusted ON recovery_contacts(trusted_contact_id);
+      CREATE INDEX IF NOT EXISTS idx_recovery_requests_requester ON recovery_requests(requester_id);
+      CREATE INDEX IF NOT EXISTS idx_recovery_requests_contact ON recovery_requests(trusted_contact_id);
+      CREATE INDEX IF NOT EXISTS idx_recovery_requests_status ON recovery_requests(status);
     `);
 
     // Migration to relax constraints on shared_credentials
