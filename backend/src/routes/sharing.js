@@ -35,7 +35,7 @@ router.post('/share', async (req, res) => {
 
       // Verify user owns the vault entry
       const entryCheck = await client.query(
-        'SELECT id FROM vault_entries WHERE id = $1 AND user_id = $2',
+        'SELECT id, encrypted_data, encrypted_data_nonce, encrypted_url, encrypted_url_nonce FROM vault_entries WHERE id = $1 AND user_id = $2',
         [credentialId, req.userId]
       );
 
@@ -58,16 +58,30 @@ router.post('/share', async (req, res) => {
       // Create shared credential (simplified - just store the encrypted content key)
       const result = await client.query(
         `INSERT INTO shared_credentials
-         (family_id, vault_entry_id, owner_id, encrypted_content_key, encrypted_content_key_nonce)
-         VALUES ($1, $2, $3, $4, $5)
+         (family_id, vault_entry_id, owner_id, encrypted_content_key, encrypted_content_key_nonce, encrypted_credential, encrypted_credential_nonce, encrypted_url, encrypted_url_nonce)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          ON CONFLICT (family_id, vault_entry_id)
          DO UPDATE SET
            encrypted_content_key = $4,
            encrypted_content_key_nonce = $5,
+           encrypted_credential = $6,
+           encrypted_credential_nonce = $7,
+           encrypted_url = $8,
+           encrypted_url_nonce = $9,
            is_active = true,
            updated_at = CURRENT_TIMESTAMP
          RETURNING id`,
-        [familyId, credentialId, req.userId, encrypted_content_key, encrypted_content_key_nonce]
+        [
+          familyId,
+          credentialId,
+          req.userId,
+          encrypted_content_key,
+          encrypted_content_key_nonce,
+          entryCheck.rows[0].encrypted_data,
+          entryCheck.rows[0].encrypted_data_nonce,
+          entryCheck.rows[0].encrypted_url,
+          entryCheck.rows[0].encrypted_url_nonce
+        ]
       );
 
       // Log action
@@ -261,7 +275,7 @@ router.post('/request-fill-token', async (req, res) => {
           const originUrl = new URL(origin);
           for (const domain of allowedDomains) {
             if (originUrl.hostname === domain ||
-                originUrl.hostname.endsWith('.' + domain)) {
+              originUrl.hostname.endsWith('.' + domain)) {
               originAllowed = true;
               break;
             }

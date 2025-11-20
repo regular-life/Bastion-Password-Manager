@@ -6,7 +6,7 @@ let mainWindow;
 let masterKey = null;
 
 // Native messaging host info
-const NATIVE_HOST_NAME = 'com.secure_vault.native';
+const NATIVE_HOST_NAME = 'com.bastion.native';
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -81,7 +81,7 @@ function setupNativeMessaging() {
   // Create native messaging host manifest
   const hostManifest = {
     name: NATIVE_HOST_NAME,
-    description: 'Secure Vault Native Messaging Host',
+    description: 'Bastion Native Messaging Host',
     path: process.execPath,
     type: 'stdio',
     allowed_origins: [

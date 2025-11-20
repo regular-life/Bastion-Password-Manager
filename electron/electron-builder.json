@@ -1,6 +1,6 @@
 {
-  "appId": "com.secure-vault.app",
-  "productName": "Secure Vault",
+  "appId": "com.bastion.app",
+  "productName": "Bastion",
   "copyright": "Copyright © 2024",
   "directories": {
     "output": "dist",
@@ -21,7 +21,7 @@
       }
     ],
     "icon": "build/icon.ico",
-    "publisherName": "Secure Vault",
+    "publisherName": "Bastion",
     "verifyUpdateCodeSignature": false
   },
   "nsis": {
@@ -29,7 +29,7 @@
     "allowToChangeInstallationDirectory": true,
     "createDesktopShortcut": true,
     "createStartMenuShortcut": true,
-    "shortcutName": "Secure Vault",
+    "shortcutName": "Bastion",
     "license": "../LICENSE.txt",
     "installerIcon": "build/icon.ico",
     "uninstallerIcon": "build/icon.ico"
@@ -47,7 +47,7 @@
     "entitlementsInherit": "build/entitlements.mac.plist"
   },
   "dmg": {
-    "title": "Secure Vault Installer",
+    "title": "Bastion Installer",
     "icon": "build/icon.icns",
     "backgroundColor": "#ffffff",
     "window": {

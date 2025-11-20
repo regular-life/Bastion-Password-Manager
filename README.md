@@ -1,4 +1,4 @@
-# Secure Vault - Password Manager
+# Bastion - Password Manager
 
 A secure, end-to-end encrypted password manager with desktop app and browser extension.
 
@@ -95,7 +95,7 @@ npm install
 2. **Set up database**:
 ```bash
 # Create database
-createdb secure_vault
+createdb bastion
 
 # Set up environment
 cd backend
@@ -136,7 +136,7 @@ npm run build:extension
 
 ```env
 PORT=3001
-DATABASE_URL=postgresql://user:password@localhost:5432/secure_vault
+DATABASE_URL=postgresql://user:password@localhost:5432/bastion
 NODE_ENV=development
 SESSION_DURATION_HOURS=24
 ```
@@ -265,7 +265,7 @@ npm test
 
 1. Verify PostgreSQL is running
 2. Check DATABASE_URL in `.env`
-3. Ensure database exists: `createdb secure_vault`
+3. Ensure database exists: `createdb bastion`
 
 ### Decryption fails
 

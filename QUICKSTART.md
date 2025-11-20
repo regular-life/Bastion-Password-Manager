@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get up and running with Secure Vault in 5 minutes.
+Get up and running with Bastion in 5 minutes.
 
 ## 1. Installation (Development)
 
@@ -12,7 +12,7 @@ cd new2
 npm install
 
 # Set up database
-createdb secure_vault
+createdb bastion
 
 # Configure backend
 cd backend
@@ -139,9 +139,9 @@ npm run dev:electron         # Launch desktop app
 # Building
 npm run build:extension      # Build extension
 cd frontend && npm run build # Build frontend
-cd electron && npm run build:win   # Windows installer
-cd electron && npm run build:mac   # macOS installer
-cd electron && npm run build:linux # Linux installer
+cd electron && npm run build:win   # Build Bastion-Setup-1.0.0.exe (Windows) installer
+cd electron && npm run build:mac   # Build Bastion-1.0.0.dmg (macOS) installer
+cd electron && npm run build:linux # Build Bastion-1.0.0.AppImage (Linux) installer
 
 # Testing
 npm test                     # Run crypto tests
@@ -192,7 +192,7 @@ cd shared && npm test        # Run shared tests
 psql -l
 
 # Create database if missing
-createdb secure_vault
+createdb bastion
 
 # Check connection string
 cat backend/.env

@@ -1,4 +1,4 @@
-# Building Secure Vault
+# Building Bastion
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ cp .env.example .env
 
 3. Initialize database:
 ```bash
-createdb secure_vault
+createdb bastion
 ```
 
 4. Start development servers:
@@ -58,7 +58,7 @@ cd electron
 npm run build:win
 ```
 
-Output: `electron/dist/Secure Vault Setup 1.0.0.exe`
+Output: `electron/dist/Bastion Setup 1.0.0.exe`
 
 **Code Signing** (recommended for production):
 
@@ -81,7 +81,7 @@ cd electron
 npm run build:mac
 ```
 
-Output: `electron/dist/Secure Vault-1.0.0.dmg`
+Output: `electron/dist/Bastion-1.0.0.dmg`
 
 **Code Signing** (required for macOS):
 
@@ -106,8 +106,8 @@ npm run build:linux
 ```
 
 Output:
-- `electron/dist/Secure Vault-1.0.0.AppImage`
-- `electron/dist/secure-vault_1.0.0_amd64.deb`
+- `electron/dist/Bastion-1.0.0.AppImage`
+- `electron/dist/bastion_1.0.0_amd64.deb`
 
 ### Browser Extension Build
 
@@ -160,9 +160,9 @@ Host the installers on your website:
 
 ```
 https://example.com/downloads/
-  - SecureVault-Setup-1.0.0.exe (Windows)
-  - SecureVault-1.0.0.dmg (macOS)
-  - SecureVault-1.0.0.AppImage (Linux)
+  - Bastion-Setup-1.0.0.exe (Windows)
+  - Bastion-1.0.0.dmg (macOS)
+  - Bastion-1.0.0.AppImage (Linux)
 ```
 
 ### Package Managers
@@ -170,14 +170,14 @@ https://example.com/downloads/
 **Windows - Chocolatey:**
 ```bash
 choco pack
-choco push secure-vault.1.0.0.nupkg --api-key=YOUR_KEY
+choco push bastion.1.0.0.nupkg --api-key=YOUR_KEY
 ```
 
 **macOS - Homebrew:**
 ```ruby
-cask "secure-vault" do
+cask "bastion" do
   version "1.0.0"
-  url "https://example.com/SecureVault-1.0.0.dmg"
+  url "https://example.com/Bastion-1.0.0.dmg"
   # ...
 end
 ```
@@ -185,7 +185,7 @@ end
 **Linux - Snap Store:**
 ```bash
 snapcraft
-snapcraft push secure-vault_1.0.0_amd64.snap
+snapcraft push bastion_1.0.0_amd64.snap
 ```
 
 ### Auto-Updates
@@ -201,7 +201,7 @@ Electron supports auto-updates via electron-updater.
   "publish": {
     "provider": "github",
     "owner": "your-username",
-    "repo": "secure-vault"
+    "repo": "bastion"
   }
 }
 ```
@@ -243,30 +243,30 @@ jobs:
 
 ```bash
 # Install
-./electron/dist/Secure\ Vault\ Setup\ 1.0.0.exe
+./electron/dist/Bastion\ Setup\ 1.0.0.exe
 
 # Test
-"C:\Program Files\Secure Vault\Secure Vault.exe"
+"C:\Program Files\Bastion\Bastion.exe"
 ```
 
 ### macOS
 
 ```bash
 # Open DMG
-open electron/dist/Secure\ Vault-1.0.0.dmg
+open electron/dist/Bastion-1.0.0.dmg
 
 # Drag to Applications and test
-open /Applications/Secure\ Vault.app
+open /Applications/Bastion.app
 ```
 
 ### Linux
 
 ```bash
 # Make executable
-chmod +x electron/dist/Secure\ Vault-1.0.0.AppImage
+chmod +x electron/dist/Bastion-1.0.0.AppImage
 
 # Run
-./electron/dist/Secure\ Vault-1.0.0.AppImage
+./electron/dist/Bastion-1.0.0.AppImage
 ```
 
 ## Troubleshooting

@@ -66,6 +66,16 @@ export async function initDatabase() {
         UNIQUE(family_id, user_id)
       );
 
+      CREATE TABLE IF NOT EXISTS family_keys (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        encrypted_family_key TEXT NOT NULL,
+        encrypted_family_key_nonce TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(family_id, user_id)
+      );
+
       CREATE TABLE IF NOT EXISTS family_invites (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         family_id UUID NOT NULL REFERENCES families(id) ON DELETE CASCADE,
@@ -86,8 +96,8 @@ export async function initDatabase() {
         encrypted_content_key_nonce TEXT NOT NULL,
         encrypted_credential TEXT NOT NULL,
         encrypted_credential_nonce TEXT NOT NULL,
-        encrypted_url TEXT NOT NULL,
-        encrypted_url_nonce TEXT NOT NULL,
+        encrypted_url TEXT,
+        encrypted_url_nonce TEXT,
         allowed_domains JSONB NOT NULL DEFAULT '[]',
         is_active BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -130,6 +140,15 @@ export async function initDatabase() {
       CREATE INDEX IF NOT EXISTS idx_audit_log_family_id ON audit_log(family_id);
       CREATE INDEX IF NOT EXISTS idx_audit_log_user_id ON audit_log(user_id);
     `);
+
+    // Migration to relax constraints on shared_credentials
+    try {
+      await client.query('ALTER TABLE shared_credentials ALTER COLUMN encrypted_url DROP NOT NULL');
+      await client.query('ALTER TABLE shared_credentials ALTER COLUMN encrypted_url_nonce DROP NOT NULL');
+    } catch (err) {
+      // Ignore errors
+    }
+
     console.log('Database initialized successfully');
   } finally {
     client.release();

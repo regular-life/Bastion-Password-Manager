@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Setting up Secure Vault..."
+echo "Setting up Bastion..."
 
 # Install dependencies
 echo "Installing dependencies..."
@@ -9,13 +9,13 @@ npm install
 # Set up database
 echo ""
 echo "Setting up database..."
-echo "Creating database 'secure_vault'..."
+echo "Creating database 'bastion'..."
 
 # Check if database exists
-if psql -lqt | cut -d \| -f 1 | grep -qw secure_vault; then
+if psql -lqt | cut -d \| -f 1 | grep -qw bastion; then
     echo "Database already exists"
 else
-    createdb secure_vault
+    createdb bastion
     echo "Database created"
 fi
 

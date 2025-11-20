@@ -316,7 +316,7 @@ function Vault({ user, token, masterKey, onLogout }) {
   return (
     <>
       <div className="header">
-        <h1>Secure Vault</h1>
+        <h1>Bastion</h1>
         <div>
           <span style={{ marginRight: '20px', color: '#666' }}>{user.email}</span>
           <button onClick={onLogout}>Logout</button>

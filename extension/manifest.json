@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Secure Vault",
+  "name": "Bastion",
   "version": "1.0.0",
   "description": "Secure password manager extension",
   "permissions": [
@@ -16,8 +16,12 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     }
   ],
