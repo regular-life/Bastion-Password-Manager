@@ -12,11 +12,12 @@
   "type": "commonjs",
   "scripts": {
     "dev": "NODE_ENV=development electron .",
-    "build": "electron-builder --config electron-builder.json",
-    "build:win": "electron-builder --win --config electron-builder.json",
-    "build:mac": "electron-builder --mac --config electron-builder.json",
-    "build:linux": "electron-builder --linux --config electron-builder.json",
-    "pack": "electron-builder --dir"
+    "build:frontend": "cd ../frontend && npm run build",
+    "build": "npm run build:frontend && electron-builder --config electron-builder.json",
+    "build:win": "npm run build:frontend && electron-builder --win --config electron-builder.json",
+    "build:mac": "npm run build:frontend && electron-builder --mac --config electron-builder.json",
+    "build:linux": "npm run build:frontend && electron-builder --linux --config electron-builder.json",
+    "pack": "npm run build:frontend && electron-builder --dir"
   },
   "dependencies": {},
   "devDependencies": {

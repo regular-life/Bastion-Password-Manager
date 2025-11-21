@@ -8,6 +8,29 @@ import {
 } from '../api';
 import { generateKey, encrypt, decrypt, bytesToString } from '../crypto';
 
+const CopyButton = ({ text, label }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="icon-button"
+      title={`Copy ${label}`}
+      style={{ marginLeft: '8px', padding: '2px 8px', fontSize: '0.75rem', height: 'auto', border: '1px solid var(--border)' }}
+    >
+      {copied ? 'Copied!' : 'Copy'}
+    </button>
+  );
+};
+
 function CredentialSharing({ token, masterKey }) {
   const [families, setFamilies] = useState([]);
   const [selectedFamilyId, setSelectedFamilyId] = useState('');
@@ -181,6 +204,7 @@ function CredentialSharing({ token, masterKey }) {
             id: cred.id,
             url: decryptedUrl,
             username: data.username,
+            password: data.password,
             // Members can't see plaintext password
             isMasked: currentFamily.role === 'member',
             owner_email: cred.owner_email,
@@ -327,8 +351,8 @@ function CredentialSharing({ token, masterKey }) {
                   )}
                 </div>
                 <div className="vault-entry-info">
-                  <p><strong>Username:</strong> {cred.username}</p>
-                  <p><strong>Password:</strong> {cred.isMasked ? '••••••••' : '(use autofill)'}</p>
+                  <p><strong>Username:</strong> {cred.username} <CopyButton text={cred.username} label="Username" /></p>
+                  <p><strong>Password:</strong> {cred.isMasked ? '••••••••' : '(use autofill)'} <CopyButton text={cred.password} label="Password" /></p>
                   <p className="info">Shared by: {cred.owner_email}</p>
                   {cred.isMasked && (
                     <p className="info">
