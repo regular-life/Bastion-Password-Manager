@@ -22,3 +22,8 @@ extension/*.png
 # Database
 *.db
 *.sqlite
+
+# Application
+*.exe
+*.AppImage
+*.zip
