@@ -136,7 +136,7 @@ function AuditLog({ token }) {
                 >
                   {getActionLabel(log.action)}
                 </span>
-                <span className="log-timestamp">{formatDate(log.timestamp)}</span>
+                <span className="log-timestamp">{formatDate(log.created_at)}</span>
               </div>
               <div className="log-details">
                 <p><strong>User:</strong> {log.user_email}</p>

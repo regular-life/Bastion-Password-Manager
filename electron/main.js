@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -74,6 +74,19 @@ ipcMain.handle('clear-master-key', () => {
     masterKey = null;
   }
   return true;
+});
+
+// Dialog handler
+ipcMain.handle('show-confirm-dialog', async (event, message) => {
+  const result = await dialog.showMessageBox(mainWindow, {
+    type: 'question',
+    buttons: ['Yes', 'No'],
+    defaultId: 0,
+    title: 'Bastion',
+    message: 'Bastion',
+    detail: message,
+  });
+  return result.response === 0;
 });
 
 // Native messaging setup

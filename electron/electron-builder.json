@@ -76,10 +76,10 @@
   },
   "linux": {
     "target": [
-      "AppImage"
+      "zip"
     ],
     "category": "Utility",
-    "icon": "build/icons/",
+    "icon": "build/icons",
     "maintainer": "Bastion Team <team@bastion.dev>"
   }
 }

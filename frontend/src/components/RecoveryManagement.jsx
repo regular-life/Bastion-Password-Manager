@@ -161,7 +161,14 @@ function RecoveryManagement({ token, masterKey, user }) {
     };
 
     const handleRemoveTrustedContact = async (contactId) => {
-        if (!confirm('Are you sure you want to remove this trusted contact?')) {
+        let confirmed = false;
+        if (window.electronAPI && window.electronAPI.showConfirmDialog) {
+            confirmed = await window.electronAPI.showConfirmDialog('Are you sure you want to remove this trusted contact?');
+        } else {
+            confirmed = confirm('Are you sure you want to remove this trusted contact?');
+        }
+
+        if (!confirmed) {
             return;
         }
 

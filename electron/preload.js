@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setMasterKey: (key) => ipcRenderer.invoke('set-master-key', key),
   getMasterKey: () => ipcRenderer.invoke('get-master-key'),
   clearMasterKey: () => ipcRenderer.invoke('clear-master-key'),
+  showConfirmDialog: (message) => ipcRenderer.invoke('show-confirm-dialog', message),
 });

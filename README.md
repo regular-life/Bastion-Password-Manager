@@ -150,14 +150,20 @@ npm run build:mac
 
 Output: `electron/dist/Bastion-1.0.0.dmg`
 
-#### Linux (.AppImage)
+#### Linux (Zip Archive)
 
 ```bash
 cd electron
 npm run build:linux
 ```
 
-Output: `electron/dist/Bastion-1.0.0.AppImage`
+Output: `electron/dist/electron-1.0.0.zip`
+
+**To run on Linux:**
+1. Extract the zip file: `unzip electron-1.0.0.zip`
+2. Navigate to the extracted folder: `cd linux-unpacked`
+3. Make the executable runnable: `chmod +x bastion`
+4. Run the application: `./bastion`
 
 ### Configure Remote Backend
 

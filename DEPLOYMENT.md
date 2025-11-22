@@ -266,8 +266,7 @@ After building, you'll find:
 electron/dist/
 ├── Bastion Setup 1.0.0.exe      # Windows installer
 ├── Bastion-1.0.0.dmg            # macOS installer
-├── Bastion-1.0.0.AppImage       # Linux AppImage
-└── bastion_1.0.0_amd64.deb      # Linux Debian package (if built)
+└── electron-1.0.0.zip            # Linux zip archive
 ```
 
 ### Distribution
@@ -276,9 +275,9 @@ electron/dist/
 
 1.  **Upload installers** to a file server or cloud storage
 2.  **Create download page** with instructions:
-    -   Windows: Download and run `Bastion Setup.exe`
-    -   macOS: Download, open DMG, drag to Applications
-    -   Linux: Download AppImage, make executable, run
+    -   **Windows**: Download and run `Bastion Setup.exe`
+    -   **macOS**: Download, open DMG, drag to Applications
+    -   **Linux**: Download zip file, extract, and run (see below)
 
 3.  **Provide user guide**: Share the User-Guide.md
 
@@ -315,11 +314,31 @@ open /Applications/Bastion.app
 #### Linux
 
 ```bash
-# Make executable
-chmod +x electron/dist/Bastion-1.0.0.AppImage
+# Extract the zip file
+unzip electron/dist/electron-1.0.0.zip -d bastion-app
 
-# Run
-./electron/dist/Bastion-1.0.0.AppImage
+# Navigate to the extracted folder
+cd bastion-app/linux-unpacked
+
+# Make the executable runnable
+chmod +x bastion
+
+# Run the application
+./bastion
+
+# Optional: Create a desktop shortcut
+# Copy the executable to a permanent location
+sudo cp -r ../linux-unpacked /opt/bastion
+
+# Create a desktop entry
+cat > ~/.local/share/applications/bastion.desktop <<EOF
+[Desktop Entry]
+Name=Bastion Password Manager
+Exec=/opt/bastion/bastion
+Icon=/opt/bastion/resources/app/build/icon.png
+Type=Application
+Categories=Utility;Security;
+EOF
 ```
 
 ## Updating/Maintenance
