@@ -76,7 +76,7 @@
   },
   "linux": {
     "target": [
-      "zip"
+      "AppImage"
     ],
     "category": "Utility",
     "icon": "build/icons",
