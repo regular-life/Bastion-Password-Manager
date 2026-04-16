@@ -1,5 +1,4 @@
 // Popup script with login
-import { deriveMasterKey } from './crypto-lib.js';
 
 const loginView = document.getElementById('login-view');
 const unlockedView = document.getElementById('unlocked-view');
@@ -53,15 +52,11 @@ loginBtn.addEventListener('click', async () => {
 
     const { token, salt } = await loginResponse.json();
 
-    // Derive master key from password and salt
-    const masterKey = await deriveMasterKey(password, salt);
-
     // Send to background script to cache
     const unlockResult = await chrome.runtime.sendMessage({
       type: 'login',
       token,
       email,
-      masterKey: Array.from(masterKey), // Convert to array for messaging
     });
 
     if (unlockResult.error) {

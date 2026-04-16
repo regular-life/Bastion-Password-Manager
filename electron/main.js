@@ -2,8 +2,10 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
+// Load native crypto addon
+const bastionCrypto = require('./native-crypto/index.js');
+
 let mainWindow;
-let masterKey = null;
 
 // Native messaging host info
 const NATIVE_HOST_NAME = 'com.bastion.native';
@@ -19,22 +21,16 @@ function createWindow() {
     },
   });
 
-  // In development, load from Vite dev server
   if (process.env.NODE_ENV === 'development') {
     mainWindow.loadURL('http://localhost:3000');
     mainWindow.webContents.openDevTools();
   } else {
-    // In production, load from built files
     mainWindow.loadFile(path.join(__dirname, 'frontend/index.html'));
   }
 
   mainWindow.on('closed', () => {
     mainWindow = null;
-    // Clear master key from memory on window close
-    if (masterKey) {
-      masterKey.fill(0);
-      masterKey = null;
-    }
+    bastionCrypto.clearMasterKey();
   });
 }
 
@@ -55,25 +51,47 @@ app.on('window-all-closed', () => {
   }
 });
 
-// IPC handlers for master key management
-ipcMain.handle('set-master-key', (event, key) => {
-  masterKey = Buffer.from(key);
-  return true;
+// IPC handlers for crypto
+ipcMain.on('crypto:deriveMasterKey', (event, password, salt) => {
+  event.returnValue = bastionCrypto.deriveMasterKey(password, salt);
 });
-
-ipcMain.handle('get-master-key', () => {
-  if (!masterKey) {
-    return null;
-  }
-  return Array.from(masterKey);
+ipcMain.on('crypto:clearMasterKey', (event) => {
+  event.returnValue = bastionCrypto.clearMasterKey();
 });
-
-ipcMain.handle('clear-master-key', () => {
-  if (masterKey) {
-    masterKey.fill(0);
-    masterKey = null;
+ipcMain.on('crypto:generateKey', (event) => {
+  event.returnValue = bastionCrypto.generateKey();
+});
+ipcMain.on('crypto:destroyKey', (event, keyHandle) => {
+  event.returnValue = bastionCrypto.destroyKey(keyHandle);
+});
+ipcMain.on('crypto:encrypt', (event, plaintext, keyHandle) => {
+  try {
+    event.returnValue = bastionCrypto.encrypt(plaintext, keyHandle);
+  } catch (e) {
+    event.returnValue = { error: e.message };
   }
-  return true;
+});
+ipcMain.on('crypto:decrypt', (event, ciphertext, nonce, keyHandle, returnAsHandle) => {
+  try {
+    event.returnValue = bastionCrypto.decrypt(ciphertext, nonce, keyHandle, returnAsHandle);
+  } catch (e) {
+    event.returnValue = { error: e.message };
+  }
+});
+ipcMain.on('crypto:generateKeyPair', (event) => {
+  try {
+    event.returnValue = bastionCrypto.generateKeyPair();
+  } catch (e) { event.returnValue = { error: e.message }; }
+});
+ipcMain.on('crypto:encryptForPublicKey', (event, plaintext, pk) => {
+  try {
+    event.returnValue = bastionCrypto.encryptForPublicKey(plaintext, pk);
+  } catch (e) { event.returnValue = { error: e.message }; }
+});
+ipcMain.on('crypto:decryptWithPrivateKey', (event, ciphertext, pk, sk) => {
+  try {
+    event.returnValue = bastionCrypto.decryptWithPrivateKey(ciphertext, pk, sk);
+  } catch (e) { event.returnValue = { error: e.message }; }
 });
 
 // Dialog handler
@@ -91,7 +109,6 @@ ipcMain.handle('show-confirm-dialog', async (event, message) => {
 
 // Native messaging setup
 function setupNativeMessaging() {
-  // Create native messaging host manifest
   const hostManifest = {
     name: NATIVE_HOST_NAME,
     description: 'Bastion Native Messaging Host',
@@ -102,7 +119,6 @@ function setupNativeMessaging() {
     ],
   };
 
-  // Install manifest files for Chrome/Edge
   if (process.platform === 'darwin') {
     const chromeDir = path.join(
       process.env.HOME,
@@ -115,9 +131,7 @@ function setupNativeMessaging() {
 
     [chromeDir, edgeDir].forEach((dir) => {
       try {
-        if (!fs.existsSync(dir)) {
-          fs.mkdirSync(dir, { recursive: true });
-        }
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
         fs.writeFileSync(
           path.join(dir, `${NATIVE_HOST_NAME}.json`),
           JSON.stringify(hostManifest, null, 2)
@@ -129,7 +143,6 @@ function setupNativeMessaging() {
   }
 }
 
-// Native messaging handler (stdio)
 if (process.argv.includes('--native-messaging')) {
   handleNativeMessaging();
 }
@@ -150,19 +163,67 @@ function handleNativeMessaging() {
   });
 }
 
+function urlMatches(currentUrl, savedUrl) {
+  try {
+    const current = new URL(currentUrl);
+    const saved = new URL(savedUrl);
+    return current.hostname === saved.hostname ||
+           current.hostname.endsWith('.' + saved.hostname) ||
+           saved.hostname.endsWith('.' + current.hostname);
+  } catch (err) { return false; }
+}
+
 function handleNativeMessage(message, callback) {
   switch (message.type) {
-    case 'get-master-key':
-      if (masterKey) {
-        callback({
-          type: 'master-key',
-          key: Array.from(masterKey),
-        });
-      } else {
-        callback({
-          type: 'error',
-          error: 'Master key not available',
-        });
+    case 'get-credentials':
+      try {
+        const matches = [];
+        for (const entry of message.entries) {
+          try {
+            // Send MASTER_KEY string to indicate using internal master key
+            let entryKeyHandle = bastionCrypto.decrypt(
+              entry.encrypted_entry_key, 
+              entry.encrypted_entry_key_nonce, 
+              'MASTER_KEY', 
+              true // returnAsHandle
+            );
+            
+            if (entryKeyHandle && entryKeyHandle._isHandle) {
+              let entryUrl = '';
+              if (entry.encrypted_url && entry.encrypted_url_nonce) {
+                const urlBytes = bastionCrypto.decrypt(
+                  entry.encrypted_url, 
+                  entry.encrypted_url_nonce, 
+                  entryKeyHandle, 
+                  false
+                );
+                entryUrl = Buffer.from(urlBytes).toString('utf8');
+              }
+              
+              if (entryUrl && urlMatches(message.url, entryUrl)) {
+                const dataBytes = bastionCrypto.decrypt(
+                  entry.encrypted_data, 
+                  entry.encrypted_data_nonce, 
+                  entryKeyHandle, 
+                  false
+                );
+                const data = JSON.parse(Buffer.from(dataBytes).toString('utf8'));
+                matches.push({
+                  id: entry.id,
+                  url: entryUrl,
+                  username: data.username,
+                  password: data.password,
+                });
+              }
+              bastionCrypto.destroyKey(entryKeyHandle);
+            }
+          } catch (err) {
+            console.error('Failed processing entry', err);
+          }
+        }
+        callback({ type: 'credentials-response', credentials: matches });
+      } catch (err) {
+        callback({ type: 'error', error: err.message });
       }
       break;
 
@@ -171,10 +232,7 @@ function handleNativeMessage(message, callback) {
       break;
 
     default:
-      callback({
-        type: 'error',
-        error: 'Unknown message type',
-      });
+      callback({ type: 'error', error: 'Unknown message type' });
   }
 }
 

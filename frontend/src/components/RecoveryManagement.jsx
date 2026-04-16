@@ -15,6 +15,7 @@ import {
     generateKeyPair,
     encrypt,
     decrypt,
+    decryptKey,
     encryptForPublicKey,
     decryptWithPrivateKey,
     toBase64,
@@ -193,7 +194,7 @@ function RecoveryManagement({ token, masterKey, user }) {
             const keypairData = await getRecoveryKeypair(token);
 
             // Decrypt our private key with our master key
-            const privateKey = decrypt(
+            const privateKey = decryptKey(
                 keypairData.encryptedPrivateKey,
                 keypairData.encryptedPrivateKeyNonce,
                 masterKey

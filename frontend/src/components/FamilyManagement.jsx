@@ -8,7 +8,7 @@ import {
   getFamilyKey,
   getFamilyMembers,
 } from '../api';
-import { generateKey, encrypt, decrypt } from '../crypto';
+import { generateKey, encrypt, decrypt, decryptKey } from '../crypto';
 import sodium from 'libsodium-wrappers';
 
 function FamilyManagement({ token, masterKey }) {
@@ -198,7 +198,7 @@ function FamilyManagement({ token, masterKey }) {
       const keyData = await getFamilyKey(token, selectedFamily.id);
 
       // Decrypt family key with owner's master key
-      const familyKey = decrypt(
+      const familyKey = decryptKey(
         keyData.encryptedFamilyKey,
         keyData.encryptedFamilyKeyNonce,
         masterKey

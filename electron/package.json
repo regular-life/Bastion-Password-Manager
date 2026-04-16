@@ -2,10 +2,7 @@
   "name": "electron",
   "version": "1.0.0",
   "description": "Bastion Password Manager - Secure password manager with family sharing",
-  "author": {
-    "name": "Bastion Team",
-    "email": "team@bastion.dev"
-  },
+  "author": "Bastion Team <team@bastion.dev>",
   "homepage": "https://github.com/arnavjindal/Bastion-Password-Manager",
   "private": true,
   "main": "main.js",
@@ -19,12 +16,13 @@
     "build:linux": "npm run build:frontend && electron-builder --linux --config electron-builder.json",
     "pack": "npm run build:frontend && electron-builder --dir"
   },
-  "dependencies": {},
   "devDependencies": {
     "electron": "^28.1.0",
     "electron-builder": "^24.9.1"
   },
   "build": {
     "extends": "./electron-builder.json"
-  }
+  },
+  "keywords": [],
+  "license": "ISC"
 }

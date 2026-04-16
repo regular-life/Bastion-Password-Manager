@@ -27,3 +27,6 @@ extension/*.png
 *.exe
 *.AppImage
 *.zip
+
+# Documentation
+docs/*_DOC.md

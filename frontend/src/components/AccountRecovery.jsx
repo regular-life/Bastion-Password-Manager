@@ -10,6 +10,7 @@ import {
 } from '../api';
 import {
   decrypt,
+  decryptKey,
   deriveMasterKey,
   bytesToString,
   generateKeyPair,
@@ -160,7 +161,7 @@ function AccountRecovery({ onBack, onRecoveryComplete }) {
       if (vaultKeys && vaultKeys.length > 0) {
         for (const entry of vaultKeys) {
           // Decrypt entry key with OLD master key
-          const entryKey = decrypt(
+          const entryKey = decryptKey(
             entry.encrypted_entry_key,
             entry.encrypted_entry_key_nonce,
             recoveredMasterKey

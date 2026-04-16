@@ -6,7 +6,7 @@ import {
   getVaultEntries,
   getFamilyKey,
 } from '../api';
-import { generateKey, encrypt, decrypt, bytesToString } from '../crypto';
+import { generateKey, encrypt, decrypt, decryptKey, bytesToString } from '../crypto';
 
 const CopyButton = ({ text, label }) => {
   const [copied, setCopied] = useState(false);
@@ -90,7 +90,7 @@ function CredentialSharing({ token, masterKey }) {
 
       // Load and decrypt family key
       const keyData = await getFamilyKey(token, familyId);
-      const decryptedFamilyKey = decrypt(
+      const decryptedFamilyKey = decryptKey(
         keyData.encryptedFamilyKey,
         keyData.encryptedFamilyKeyNonce,
         masterKey
@@ -103,7 +103,7 @@ function CredentialSharing({ token, masterKey }) {
         const decrypted = vaultData.entries.map((entry) => {
           try {
             // Decrypt the entry key
-            const entryKey = decrypt(
+            const entryKey = decryptKey(
               entry.encrypted_entry_key,
               entry.encrypted_entry_key_nonce,
               masterKey
@@ -162,7 +162,7 @@ function CredentialSharing({ token, masterKey }) {
           });
 
           // Decrypt the content key with FAMILY KEY (not master key)
-          const contentKey = decrypt(
+          const contentKey = decryptKey(
             cred.encrypted_content_key,
             cred.encrypted_content_key_nonce,
             decryptedFamilyKey

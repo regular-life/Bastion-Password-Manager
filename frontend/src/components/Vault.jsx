@@ -9,6 +9,7 @@ import {
   generateKey,
   encrypt,
   decrypt,
+  decryptKey,
   bytesToString,
   secureClear,
 } from '../crypto';
@@ -65,7 +66,7 @@ function Vault({ user, token, masterKey, onLogout }) {
           console.log('Decrypting entry:', entry.id);
 
           // Decrypt the entry key
-          const entryKey = decrypt(
+          const entryKey = decryptKey(
             entry.encrypted_entry_key,
             entry.encrypted_entry_key_nonce,
             masterKey
